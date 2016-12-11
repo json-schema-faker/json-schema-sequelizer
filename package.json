@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "main": "lib/index.js",
   "author": "Alvaro Cabrera <pateketrueke@gmail.com>",
+  "description": "Sequelize models with JSON-Schema powers!",
   "license": "MIT",
   "scripts": {
     "dev": "jasmine-node spec --coffee --verbose --autoTest --watchFolders lib",

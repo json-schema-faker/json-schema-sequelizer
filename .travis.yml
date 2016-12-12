@@ -1,0 +1,18 @@
+sudo: required
+dist: trusty
+services:
+  - postgresql
+addons:
+  postgresql: '9.5'
+language: node_js
+node_js:
+  - 4
+  - 6
+before_script:
+  - psql -c 'create database travis_ci_test;' -U postgres
+script:
+  - 'yarn cover'
+after_success:
+  - 'yarn cover:up'
+notifications:
+  email: false

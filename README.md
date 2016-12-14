@@ -5,7 +5,7 @@
 Declare your Sequelize models using JSON-Schema today!
 
 ```bash
-$ yarn add pateketrueke/json-schema-sequelizer
+$ yarn add json-schema-sequelizer
 ```
 
 _This is a **work in progress**, any feedback is very welcome!_

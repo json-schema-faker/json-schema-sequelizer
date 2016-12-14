@@ -20,9 +20,12 @@
     "eslint-plugin-import": "^2.2.0",
     "istanbul": "^0.4.5",
     "jasmine-node": "2.0.0-beta4",
-    "json-schema-faker": "^0.4.0",
+    "json-schema-faker": "0.4.0",
     "pg": "^6.1.0",
     "sequelize": "^3.27.0",
     "sqlite3": "^3.1.8"
+  },
+  "dependencies": {
+    "deref": "^0.7.0"
   }
 }

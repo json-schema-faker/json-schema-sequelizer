@@ -372,6 +372,12 @@ depd@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/depd/-/depd-1.1.0.tgz#e1bd82c6aab6ced965b97b88b17ed3e528ca18c3"
 
+deref@0.7.0:
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/deref/-/deref-0.7.0.tgz#f862485b971f51e9aad590d149b9eb46dcc074c1"
+  dependencies:
+    deep-extend "^0.4.0"
+
 deref@^0.6.4:
   version "0.6.4"
   resolved "https://registry.yarnpkg.com/deref/-/deref-0.6.4.tgz#bd5a96d45dbed3011bb81bdf68ddf54be8e1bd4e"

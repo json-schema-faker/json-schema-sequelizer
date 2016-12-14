@@ -61,7 +61,7 @@ const refs = [
 Once we've defined everything is time to instantiate some objects:
 
 ```js
-const m = JSONSchemaSequelizer(sequelize, models, refs);
+const m = new JSONSchemaSequelizer(sequelize, models, refs);
 ```
 
 Now, `m` is an object holding all our defined models, along with their associations.

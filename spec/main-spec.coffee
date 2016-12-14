@@ -20,16 +20,15 @@ describe 'sequelizer()', ->
     beforeEach (done) ->
       t.setup 'sqlite', ':memory:'
 
-      Blog = {
+      @m = $(t.sequelize(), [{
         $schema:
           id: 'Blog'
           properties:
             id: $ref: 'dataTypes#/definitions/primaryKey'
             name: type: 'string'
           required: ['id', 'name']
-      }
+      }], refs)
 
-      @m = $(t.sequelize(), [Blog], refs)
       @m.sync().then -> done()
 
     it 'should export all given models', ->

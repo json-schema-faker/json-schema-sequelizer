@@ -8,7 +8,7 @@ Declare your Sequelize models using JSON-Schema today!
 $ yarn add pateketrueke/json-schema-sequelizer
 ```
 
-This is a **work in progress**, any feedback is very welcome!
+_This is a **work in progress**, any feedback is very welcome!_
 
 ## Basic usage
 
@@ -23,7 +23,7 @@ const sequelize = new Sequelize({
 });
 ```
 
-The next thing is declaring our models:
+The next thing is declaring your models:
 
 ```js
 const models = [

@@ -40,8 +40,8 @@ const models = [
       },
       required: ['id', 'name'],
     },
+    // any other property will be used as the model definition
   },
-  // any other property will be used as the model definition
 ];
 ```
 

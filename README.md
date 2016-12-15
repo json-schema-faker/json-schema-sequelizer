@@ -151,7 +151,17 @@ console.log(JSON.stringify(m.Tag.faked.findOne(), null, 2));
 
 Relationships between models are declared with references:
 
-- `hasOne` &larr; `{ "x": { "$ref": "Model" } }`
-- `hasMany` &larr; `{ "x": { "items": { "$ref": "Model" } } }`
-- `belongsTo` &larr; `{ "x": { "$ref": "Model", "belongsTo": true } }`
-- `belongsToMany` &larr; `{ "x": { "$ref": "Model", "belongsToMany": true } }`
+- `hasOne` &larr; `{ x: { $ref: 'Model' } }`
+- `hasMany` &larr; `{ x: { items: { $ref: 'Model' } } }`
+- `belongsTo` &larr; `{ x: { $ref: 'Model', belongsTo: true } }`
+- `belongsToMany` &larr; `{ x: { $ref: 'Model', belongsToMany: true } }`
+
+Additionally you can pass an object to provide options to the association, e.g.
+
+```js
+{ x: { $ref: 'Model', belongsToMany: { through: 'OtherModel' } } }
+```
+
+Special keys like `model` and `through` are resolved before making the association.
+
+E.g., if you've defined `OtherModel` it will be used instead, otherwise the options are passed as is to Sequelize (which in turn can create the intermediate table as well).

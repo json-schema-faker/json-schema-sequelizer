@@ -24,7 +24,7 @@
     "sqlite3": "^3.1.8"
   },
   "dependencies": {
-    "json-schema-faker": "^0.5.0",
+    "json-schema-faker": "json-schema-faker/json-schema-faker#develop",
     "sequelize": "^3.27.0"
   }
 }

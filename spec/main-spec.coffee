@@ -45,39 +45,36 @@ describe 'sequelizer()', ->
         .then (@m) => @m.sync()
         .then -> done()
 
-    it '...', ->
-      console.log Object.keys(@m)
+    it 'should associate <prop>.items.$ref as hasMany', (done) ->
+      @m.Blog
+        .create({
+          myPosts: [
+            { title: 'Hello World', body: 'JSON-Schema rocks!' }
+          ]
+        }, { include: [@m.Blog.refs.myPosts] })
+        .then (firstBlog) ->
+          expect(firstBlog.myPosts[0].get('title')).toEqual 'Hello World'
+        .then -> done()
 
-    # it 'should associate <prop>.items.$ref as hasMany', (done) ->
-    #   @m.Blog
-    #     .create({
-    #       myPosts: [
-    #         { title: 'Hello World', body: 'JSON-Schema rocks!' }
-    #       ]
-    #     }, { include: [@m.Blog.refs.myPosts] })
-    #     .then (firstBlog) ->
-    #       expect(firstBlog.myPosts[0].get('title')).toEqual 'Hello World'
-    #     .then -> done()
+    it 'should associate <prop>.$ref as hasOne', (done) ->
+      @m.Blog
+        .create({
+          featuredPost: { title: 'OSOM' }
+        }, { include: [@m.Blog.refs.featuredPost] })
+        .then (firstBlog) ->
+          expect(firstBlog.featuredPost.get('title')).toEqual 'OSOM'
+        .then -> done()
 
-    # it 'should associate <prop>.$ref as hasOne', (done) ->
-    #   @m.Blog
-    #     .create({
-    #       featuredPost: { title: 'OSOM' }
-    #     }, { include: [@m.Blog.refs.featuredPost] })
-    #     .then (firstBlog) ->
-    #       expect(firstBlog.featuredPost.get('title')).toEqual 'OSOM'
-    #     .then -> done()
-
-    # it 'should support other keywords too', (done) ->
-    #   @m.Person
-    #     .create({
-    #       name: 'Gran Ma'
-    #       children: [
-    #         { name: 'Ma' }
-    #         { name: 'Uncle' }
-    #       ]
-    #     }, { include: [@m.Person.refs.children] })
-    #     .then (familyTree) ->
-    #       expect(familyTree.get('name')).toEqual 'Gran Ma'
-    #       expect(familyTree.children[1].get('name')).toEqual 'Uncle'
-    #     .then -> done()
+    it 'should support other keywords too', (done) ->
+      @m.Person
+        .create({
+          name: 'Gran Ma'
+          children: [
+            { name: 'Ma' }
+            { name: 'Uncle' }
+          ]
+        }, { include: [@m.Person.refs.children] })
+        .then (familyTree) ->
+          expect(familyTree.get('name')).toEqual 'Gran Ma'
+          expect(familyTree.children[1].get('name')).toEqual 'Uncle'
+        .then -> done()

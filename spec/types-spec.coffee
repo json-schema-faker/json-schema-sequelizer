@@ -37,7 +37,7 @@ describe 'Types support', ->
       m = null
 
       expect(->
-        m = t.define 'test', types.convertSchema(test, ->)
+        m = t.define 'test', types.convertSchema(test).props
         expect(m.toString()).toEqual '[object SequelizeModel:test]'
       ).not.toThrow()
 

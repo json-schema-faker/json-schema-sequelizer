@@ -1,0 +1,24 @@
+{
+  "$schema": {
+    "properties": {
+      "id": {
+        "$ref": "dataTypes#/definitions/primaryKey"
+      },
+      "name": {
+        "type": "string"
+      },
+      "myPosts": {
+        "items": {
+          "$ref": "Post"
+        }
+      },
+      "featuredPost": {
+        "$ref": "Post"
+      }
+    },
+    "required": [
+      "id",
+      "name"
+    ]
+  }
+}

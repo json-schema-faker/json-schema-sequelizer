@@ -1,0 +1,25 @@
+{
+  "$schema": {
+    "id": "Post",
+    "properties": {
+      "id": {
+        "$ref": "dataTypes#/definitions/primaryKey"
+      },
+      "body": {
+        "type": "string"
+      },
+      "title": {
+        "type": "string"
+      },
+      "published": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "id",
+      "body",
+      "title",
+      "published"
+    ]
+  }
+}

@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "json-schema-faker": "json-schema-faker/json-schema-faker#develop",
+    "json-schema-ref-parser": "^3.1.2",
     "sequelize": "^3.27.0"
   }
 }

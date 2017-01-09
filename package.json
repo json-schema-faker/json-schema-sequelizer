@@ -7,11 +7,11 @@
   "license": "MIT",
   "scripts": {
     "dev": "jasmine-node spec --coffee --verbose --autoTest --watchFolders lib",
-    "dev:lint": "eslint lib spec",
-    "dev:spec": "jasmine-node spec --coffee --noStackTrace --captureExceptions",
+    "lint": "eslint lib spec",
+    "spec": "jasmine-node spec --coffee --noStackTrace --captureExceptions",
     "cover": "istanbul cover --root lib --x '**/spec/**' -- jasmine-node --coffee spec",
     "cover:up": "codecov --file=coverage/lcov.info --disable=gcov -e TRAVIS_NODE_VERSION",
-    "test": "npm run dev:lint && npm run dev:spec --"
+    "test": "yarn lint && yarn cover"
   },
   "devDependencies": {
     "codecov": "^1.0.1",
@@ -24,7 +24,7 @@
     "sqlite3": "^3.1.8"
   },
   "dependencies": {
-    "json-schema-faker": "json-schema-faker/json-schema-faker#develop",
+    "json-schema-faker": "https://github.com/json-schema-faker/json-schema-faker.git#develop",
     "json-schema-ref-parser": "^3.1.2",
     "sequelize": "^3.27.0"
   }

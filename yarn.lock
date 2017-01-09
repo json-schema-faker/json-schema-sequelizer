@@ -1054,6 +1054,17 @@ jsbn@~0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/jsbn/-/jsbn-0.1.0.tgz#650987da0dd74f4ebf5a11377a2aa2d273e97dfd"
 
+"json-schema-faker@https://github.com/json-schema-faker/json-schema-faker.git#develop":
+  version "0.4.0"
+  resolved "https://github.com/json-schema-faker/json-schema-faker.git#3b53813260e873d6c4509c9f8eeeb24e43cc9566"
+  dependencies:
+    casual "^1.5.8"
+    chance "^1.0.4"
+    faker "^3.1.0"
+    json-schema-ref-parser "^3.1.2"
+    randexp "^0.4.3"
+    tslib "^1.4.0"
+
 json-schema-faker@json-schema-faker/json-schema-faker#develop:
   version "0.4.0"
   resolved "https://codeload.github.com/json-schema-faker/json-schema-faker/tar.gz/3b53813260e873d6c4509c9f8eeeb24e43cc9566"
@@ -1135,13 +1146,9 @@ lodash.isequal@^4.4.0:
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/lodash.isequal/-/lodash.isequal-4.4.0.tgz#6295768e98e14dc15ce8d362ef6340db82852031"
 
-lodash@4.12.0:
+lodash@4.12.0, lodash@^4.0.0, lodash@^4.3.0:
   version "4.12.0"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.12.0.tgz#2bd6dc46a040f59e686c972ed21d93dc59053258"
-
-lodash@^4.0.0, lodash@^4.3.0:
-  version "4.17.4"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.4.tgz#78203a4d1c328ae1d86dca6460e369b57f4055ae"
 
 lodash@~1.0.1:
   version "1.0.2"

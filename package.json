@@ -24,7 +24,7 @@
     "sqlite3": "^3.1.8"
   },
   "dependencies": {
-    "json-schema-faker": "0.5.0-rc2",
+    "json-schema-faker": "0.5.0-rc3",
     "json-schema-ref-parser": "^3.1.2",
     "pg-native": "^1.10.1",
     "sequelize": "^3.27.0"

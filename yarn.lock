@@ -1049,16 +1049,16 @@ jsbn@~0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/jsbn/-/jsbn-0.1.0.tgz#650987da0dd74f4ebf5a11377a2aa2d273e97dfd"
 
-json-schema-faker@0.5.0-rc3:
-  version "0.5.0-rc3"
-  resolved "https://registry.yarnpkg.com/json-schema-faker/-/json-schema-faker-0.5.0-rc3.tgz#a3809004ac1e77db1ed5e40b6708b5072bc11409"
+json-schema-faker@0.5.0-rc6:
+  version "0.5.0-rc6"
+  resolved "https://registry.yarnpkg.com/json-schema-faker/-/json-schema-faker-0.5.0-rc6.tgz#3cce7af89d5ce04025970430934fb1ced1675d5b"
   dependencies:
     deref "^0.7.0"
-    json-schema-ref-parser "3.1.2"
-    randexp "0.4.3"
-    tslib "1.4.0"
+    json-schema-ref-parser "^3.1.2"
+    randexp "^0.4.5"
+    tslib "^1.7.1"
 
-json-schema-ref-parser@3.1.2, json-schema-ref-parser@^3.1.2:
+json-schema-ref-parser@^3.1.2:
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/json-schema-ref-parser/-/json-schema-ref-parser-3.1.2.tgz#a38ecb7774f87f32e7eb9723d5921390e76a9a42"
   dependencies:
@@ -1433,9 +1433,9 @@ qs@~6.3.0:
   version "6.3.0"
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.3.0.tgz#f403b264f23bc01228c74131b407f18d5ea5d442"
 
-randexp@0.4.3:
-  version "0.4.3"
-  resolved "https://registry.yarnpkg.com/randexp/-/randexp-0.4.3.tgz#1712d4f9cdd57e0005c13064e0e208fba8e58d50"
+randexp@^0.4.5:
+  version "0.4.5"
+  resolved "https://registry.yarnpkg.com/randexp/-/randexp-0.4.5.tgz#ffe3a80c3f666cd71e6b008e477e584c1a32ff3e"
   dependencies:
     discontinuous-range "1.0.0"
     ret "~0.1.10"
@@ -1823,9 +1823,9 @@ tryit@^1.0.1:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/tryit/-/tryit-1.0.3.tgz#393be730a9446fd1ead6da59a014308f36c289cb"
 
-tslib@1.4.0:
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.4.0.tgz#6bb6b97fe5f3d71bfbcf10e22ee1e29b6e63cc19"
+tslib@^1.7.1:
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.7.1.tgz#bc8004164691923a79fe8378bbeb3da2017538ec"
 
 tunnel-agent@~0.4.1:
   version "0.4.3"

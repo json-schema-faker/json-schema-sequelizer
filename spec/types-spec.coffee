@@ -21,7 +21,7 @@ describe 'Types support', ->
         type: 'string'
         items: type: 'number'
         properties:
-          another: allOf: [type: 'boolean']
+          another: type: 'boolean'
 
   describe 'convertSchema()', ->
     it 'should transform json-schema into sequelize models', ->

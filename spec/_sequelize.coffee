@@ -1,13 +1,13 @@
 Sequelize = require('sequelize')
 sequelize = null
 
-module.exports.setup = (dialect, storage) ->
+module.exports.setup = (dialect, storage, logging) ->
   sequelize = new Sequelize
     username: if process.env.CI then 'postgres' else process.env.LOGNAME
     database: if process.env.CI then 'travis_ci_test' else 'test'
     dialect: dialect
     storage: storage
-    logging: false
+    logging: logging or false
     define:
       timestamps: false
       freezeTableName: true

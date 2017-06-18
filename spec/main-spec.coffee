@@ -42,7 +42,7 @@ describe 'sequelizer()', ->
       t.setup 'sqlite', ':memory:'
 
       $(t.sequelize(), refs, dir('relations'))
-        .then (@m) => @m.sync()
+        .then (@m) => @m.sync({ force: true })
         .then -> done()
 
     it 'should associate <prop>.items.$ref as hasMany', (done) ->
@@ -54,7 +54,7 @@ describe 'sequelizer()', ->
         }, { include: [@m.Blog.refs.myPosts] })
         .then (firstBlog) ->
           expect(firstBlog.myPosts[0].get('title')).toEqual 'Hello World'
-        .then -> done()
+          done()
 
     it 'should associate <prop>.$ref as hasOne', (done) ->
       @m.Blog
@@ -63,7 +63,7 @@ describe 'sequelizer()', ->
         }, { include: [@m.Blog.refs.featuredPost] })
         .then (firstBlog) ->
           expect(firstBlog.featuredPost.get('title')).toEqual 'OSOM'
-        .then -> done()
+          done()
 
     it 'should support other keywords too', (done) ->
       @m.Person
@@ -77,4 +77,4 @@ describe 'sequelizer()', ->
         .then (familyTree) ->
           expect(familyTree.get('name')).toEqual 'Gran Ma'
           expect(familyTree.children[1].get('name')).toEqual 'Uncle'
-        .then -> done()
+          done()

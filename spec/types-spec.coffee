@@ -30,6 +30,7 @@ describe 'Types support', ->
           str: type: 'string'
           num: type: 'number'
           bol: type: 'boolean'
+          foo: enum: ['bar', 'baz']
         required: ['str', 'num', 'bol']
 
       t.setup 'sqlite', ':memory:'
@@ -38,7 +39,7 @@ describe 'Types support', ->
 
       expect(->
         m = t.define 'test', types.convertSchema(test).props
-        expect(m.toString()).toEqual '[object SequelizeModel:test]'
+        expect(m.name).toEqual 'test'
       ).not.toThrow()
 
   describe 'constraintSchema()', ->
@@ -49,3 +50,18 @@ describe 'Types support', ->
         maxLength: 30
 
       expect(types.constraintSchema(test)).toEqual { validate: len: [10, 30] }
+
+  describe 'Postgres', ->
+    it 'should support ENUM types', (done) ->
+      test =
+        properties:
+          foo: enum: ['bar', 'baz']
+        required: ['foo']
+
+      t.setup 'postgres'
+      m = t.define 'test', types.convertSchema(test).props
+      m.sync({ force: true })
+      .then((m) -> m.create({ foo: 'bar' }))
+      .then (x) ->
+        expect(x.foo).toEqual 'bar'
+        done()

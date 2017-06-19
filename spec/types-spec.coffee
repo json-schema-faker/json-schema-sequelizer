@@ -64,4 +64,5 @@ describe 'Types support', ->
       .then((m) -> m.create({ foo: 'bar' }))
       .then (x) ->
         expect(x.foo).toEqual 'bar'
+        t.close()
         done()

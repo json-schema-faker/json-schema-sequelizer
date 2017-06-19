@@ -13,6 +13,9 @@ module.exports.setup = (dialect, storage, logging) ->
       freezeTableName: true
   null
 
+module.exports.close = ->
+  sequelize.close() if sequelize
+
 module.exports.define = (name, schema, properties) ->
   sequelize.define name, schema, properties
 

@@ -1,12 +1,10 @@
 {
-  "$schema": {
-    "properties": {
-      "id": {
-        "$ref": "dataTypes#/definitions/primaryKey"
-      }
-    },
-    "required": [
-      "id"
-    ]
-  }
+  "properties": {
+    "id": {
+      "$ref": "dataTypes#/definitions/primaryKey"
+    }
+  },
+  "required": [
+    "id"
+  ]
 }

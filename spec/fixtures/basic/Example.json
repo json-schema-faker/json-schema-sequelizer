@@ -1,13 +1,11 @@
 {
-  "$schema": {
-    "properties": {
-      "id": {
-        "$ref": "dataTypes#/definitions/primaryKey"
-      },
-      "name": {
-        "type": "string"
-      }
+  "properties": {
+    "id": {
+      "$ref": "dataTypes#/definitions/primaryKey"
     },
-    "required": ["id", "name"]
-  }
+    "name": {
+      "type": "string"
+    }
+  },
+  "required": ["id", "name"]
 }

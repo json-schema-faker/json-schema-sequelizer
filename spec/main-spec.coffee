@@ -24,10 +24,16 @@ describe 'sequelizer()', ->
   describe 'basic definitions', ->
     beforeEach (done) ->
       t.setup 'sqlite', ':memory:'
-
       $(t.sequelize(), refs, dir('basic'))
         .then (@m) => @m.sync()
         .then -> done()
+
+    it 'supports the v4 API', ->
+      x = new @m.Prototype()
+      expect(x.chain()).toBe x
+      expect(@m.Prototype.truth()).toEqual 42
+      expect(typeof (new @m.Example()).destroy).toEqual 'function'
+      expect(typeof (new @m.Example()).save().then).toEqual 'function'
 
     it 'should export all given models', ->
       expect(@m.Example).not.toBeUndefined()
@@ -42,7 +48,7 @@ describe 'sequelizer()', ->
       t.setup 'sqlite', ':memory:'
 
       $(t.sequelize(), refs, dir('relations'))
-        .then (@m) => @m.sync({ force: true })
+        .then (@m) => @m.sync()
         .then -> done()
 
     it 'should associate <prop>.items.$ref as hasMany', (done) ->

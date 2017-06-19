@@ -1,24 +1,22 @@
 {
-  "$schema": {
-    "properties": {
-      "id": {
-        "$ref": "dataTypes#/definitions/primaryKey"
-      },
-      "name": {
-        "type": "string"
-      },
-      "children": {
-        "items": {
-          "$ref": "Person",
-          "belongsToMany": {
-            "through": "Family"
-          }
+  "properties": {
+    "id": {
+      "$ref": "dataTypes#/definitions/primaryKey"
+    },
+    "name": {
+      "type": "string"
+    },
+    "children": {
+      "items": {
+        "$ref": "Person",
+        "belongsToMany": {
+          "through": "Family"
         }
       }
-    },
-    "required": [
-      "id",
-      "name"
-    ]
-  }
+    }
+  },
+  "required": [
+    "id",
+    "name"
+  ]
 }

@@ -1,25 +1,23 @@
 {
-  "$schema": {
-    "id": "Post",
-    "properties": {
-      "id": {
-        "$ref": "dataTypes#/definitions/primaryKey"
-      },
-      "body": {
-        "type": "string"
-      },
-      "title": {
-        "type": "string"
-      },
-      "published": {
-        "type": "boolean"
-      }
+  "id": "Post",
+  "properties": {
+    "id": {
+      "$ref": "dataTypes#/definitions/primaryKey"
     },
-    "required": [
-      "id",
-      "body",
-      "title",
-      "published"
-    ]
-  }
+    "body": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "published": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "id",
+    "body",
+    "title",
+    "published"
+  ]
 }

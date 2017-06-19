@@ -9,7 +9,7 @@ module.exports = {
     },
     required: ['str'],
   },
-  staticMethods: {
+  classMethods: {
     truth() {
       return 42;
     },

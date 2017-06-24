@@ -37,10 +37,13 @@ describe 'sequelizer()', ->
 
     it 'should export all given models', ->
       expect(@m.Example).not.toBeUndefined()
+      expect(Object.keys(@m)).toEqual ['Example', 'Prototype']
 
     it 'should support basic operations', (done) ->
      @m.Example.create({ name: 'OSOM' })
-       .then((b) -> expect(b.get('name')).toEqual('OSOM'))
+       .then (b) ->
+          expect(b.get('name')).toEqual('OSOM')
+          expect(b.now instanceof Date).toBe true
        .then -> done()
 
   describe 'relations / associations', ->

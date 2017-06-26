@@ -46,6 +46,20 @@ describe 'sequelizer()', ->
           #expect(b.now instanceof Date).toBe true
         .then -> done()
 
+  describe 'virtual types', ->
+    beforeEach (done) ->
+      t.setup 'sqlite', ':memory:'
+
+      $(t.sequelize(), refs, dir('virtual-types'))
+        .then (@m) => @m.sync()
+        .then -> done()
+
+    it 'it should accept virtual types', (done) ->
+      @m.Basic.create({ foo: 'bar', baz: 'buzz' }).then (result) ->
+        expect(result.foo).toEqual 'bar'
+        expect(result.baz).toBeUndefined()
+        done()
+
   describe 'relations / associations', ->
     beforeEach (done) ->
       t.setup 'sqlite', ':memory:'

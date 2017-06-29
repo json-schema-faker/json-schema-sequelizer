@@ -24,8 +24,9 @@ describe 'Types support', ->
           another: type: 'boolean'
 
   describe 'convertSchema()', ->
-    it 'should transform json-schema into sequelize models', ->
+    it 'should transform json-schema into sequelize models', (done) ->
       test =
+        id: 'Test'
         properties:
           str: type: 'string'
           num: type: 'number'
@@ -33,14 +34,44 @@ describe 'Types support', ->
           foo: enum: ['bar', 'baz']
         required: ['str', 'num', 'bol']
 
-      t.setup 'sqlite', ':memory:'
+      jss = t.setup
+        dialect: 'sqlite'
+        storage: ':memory:'
 
       m = null
 
-      expect(->
-        m = t.define 'test', types.convertSchema(test).props
-        expect(m.name).toEqual 'test'
-      ).not.toThrow()
+      jss.add(test).connect()
+        .then -> jss.models.Test.sync()
+        .then -> jss.models.Test.describe()
+        .then (details) ->
+          expect(details).toEqual
+            id:
+              type: 'INTEGER'
+              allowNull: true
+              defaultValue: undefined
+              primaryKey: true
+            str:
+              type: 'VARCHAR(255)'
+              allowNull: true
+              defaultValue: undefined
+              primaryKey: false
+            num:
+              type: 'DECIMAL'
+              allowNull: true
+              defaultValue: undefined
+              primaryKey: false
+            bol:
+              type: 'TINYINT(1)'
+              allowNull: true
+              defaultValue: undefined
+              primaryKey: false
+            foo:
+              type: 'TEXT'
+              allowNull: true
+              defaultValue: undefined
+              primaryKey: false
+          jss.close()
+          done()
 
   describe 'constraintSchema()', ->
     it 'should translate constraints from json-schema as validation rules', ->
@@ -54,15 +85,18 @@ describe 'Types support', ->
   describe 'Postgres', ->
     it 'should support ENUM types', (done) ->
       test =
+        id: 'Test'
         properties:
           foo: enum: ['bar', 'baz']
         required: ['foo']
 
-      t.setup 'postgres'
-      m = t.define 'test', types.convertSchema(test).props
-      m.sync({ force: true })
-      .then((m) -> m.create({ foo: 'bar' }))
-      .then (x) ->
-        expect(x.foo).toEqual 'bar'
-        t.close()
-        done()
+      jss = t.setup
+        dialect: 'postgres'
+
+      jss.add(test).connect()
+        .then -> jss.models.Test.sync({ force: true })
+        .then -> jss.models.Test.create({ foo: 'bar' })
+        .then (x) ->
+          expect(x.foo).toEqual 'bar'
+          jss.close()
+          done()

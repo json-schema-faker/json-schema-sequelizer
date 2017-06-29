@@ -1,23 +1,14 @@
-Sequelize = require('sequelize')
-sequelize = null
+JSONSchemaSequelizer = require('..')
+jss = null
 
-module.exports.setup = (dialect, storage, logging) ->
-  sequelize = new Sequelize
+module.exports.setup = (options, refs, cwd) ->
+  jss = new JSONSchemaSequelizer
     username: if process.env.CI then 'postgres' else process.env.LOGNAME
     database: if process.env.CI then 'travis_ci_test' else 'test'
-    dialect: dialect
-    storage: storage
-    logging: logging or false
+    dialect: options.dialect
+    storage: options.storage
+    logging: options.logging or false
     define:
       timestamps: false
       freezeTableName: true
-  null
-
-module.exports.close = ->
-  sequelize.close() if sequelize
-
-module.exports.define = (name, schema, properties) ->
-  sequelize.define name, schema, properties
-
-module.exports.sequelize = ->
-  sequelize
+    , refs, cwd

@@ -26,13 +26,14 @@ describe 'Types support', ->
   describe 'convertSchema()', ->
     it 'should transform json-schema into sequelize models', (done) ->
       test =
-        id: 'Test'
-        properties:
-          str: type: 'string'
-          num: type: 'number'
-          bol: type: 'boolean'
-          foo: enum: ['bar', 'baz']
-        required: ['str', 'num', 'bol']
+        $schema:
+          id: 'Test'
+          properties:
+            str: type: 'string'
+            num: type: 'number'
+            bol: type: 'boolean'
+            foo: enum: ['bar', 'baz']
+          required: ['str', 'num', 'bol']
 
       jss = t.setup
         dialect: 'sqlite'
@@ -85,10 +86,11 @@ describe 'Types support', ->
   describe 'Postgres', ->
     it 'should support ENUM types', (done) ->
       test =
-        id: 'Test'
-        properties:
-          foo: enum: ['bar', 'baz']
-        required: ['foo']
+        $schema:
+          id: 'Test'
+          properties:
+            foo: enum: ['bar', 'baz']
+          required: ['foo']
 
       jss = t.setup
         dialect: 'postgres'

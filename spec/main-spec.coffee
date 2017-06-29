@@ -19,7 +19,7 @@ refs = [
   }
 ]
 
-describe 'sequelizer()', ->
+describe 'JSONSchemaSequelizer()', ->
   describe 'basic definitions', ->
     beforeEach (done) ->
       @jss = t.setup

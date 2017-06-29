@@ -40,7 +40,7 @@ describe 'JSONSchemaSequelizer()', ->
 
     it 'should export all given models', ->
       expect(@jss.models.Example).not.toBeUndefined()
-      expect(Object.keys(@jss.models)).toEqual ['Example', 'Prototype']
+      expect(Object.keys(@jss.models).sort()).toEqual ['Example', 'Prototype']
 
     it 'should support basic operations', (done) ->
       @jss.models.Example.create({ name: 'OSOM' })

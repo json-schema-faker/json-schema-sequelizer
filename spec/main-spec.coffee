@@ -28,8 +28,8 @@ describe 'JSONSchemaSequelizer()', ->
       , refs, dir('basic')
 
       @jss.scan()
-       .sync()
-       .then -> done()
+        .sync()
+        .then -> done()
 
     it 'supports the v4 API', ->
       x = new @jss.models.Prototype()

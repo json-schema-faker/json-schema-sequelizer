@@ -43,13 +43,13 @@ describe 'Resources', ->
   it 'responds to index', (done) ->
     JSONSchemaSequelizer.resource(@ctx, @jss.models.Test, 'index')
       .then (result) ->
-        expect(result.$data).toEqual []
+        expect(result.data).toEqual []
         done()
 
   it 'responds to new', (done) ->
     JSONSchemaSequelizer.resource(@ctx, @jss.models.Test, 'new')
       .then (result) ->
-        expect(result.$isNew).toBe true
+        expect(result.isNew).toBe true
         done()
 
   it 'responds to create', (done) ->
@@ -58,11 +58,11 @@ describe 'Resources', ->
 
     JSONSchemaSequelizer.resource(@ctx, @jss.models.Test, 'create')
       .then (data) ->
-        expect(data.$result.value).toEqual 'OSOM'
+        expect(data.result.value).toEqual 'OSOM'
         done()
 
   it 'responds to edit', (done) ->
     JSONSchemaSequelizer.resource(@ctx, @jss.models.Test, 'edit')
       .then (result) ->
-        expect(result.$actions.Test.edit.path).toEqual '/test/:id/edit'
+        expect(result.get().$actions.Test.edit.path).toEqual '/test/:id/edit'
         done()

@@ -5,49 +5,19 @@
 Declare your Sequelize models using JSON-Schema today!
 
 ```bash
-$ yarn add json-schema-sequelizer
+$ npm i json-schema-sequelizer --save
 ```
 
 _This is a **work in progress**, any feedback is very welcome!_
 
 ## Basic usage
 
-First you'll need a Sequelize connection, e.g.
+First you'll need a new connection, e.g.
 
 ```js
 const JSONSchemaSequelizer = require('json-schema-sequelizer');
-const Sequelize = require('sequelize');
-const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: ':memory:',
-});
-```
 
-The next thing is declaring your models:
-
-```js
-const models = [
-  {
-    // the $schema object is required at top-level
-    $schema: {
-      id: 'Tag',
-      properties: {
-        // resolved from an external#/local reference (see below)
-        id: { $ref: 'dataTypes#/definitions/id' },
-        name: { type: 'string' },
-        // other references are used for associating things
-        children: { items: { $ref: 'Tag' } },
-      },
-      required: ['id', 'name'],
-    },
-    // any other property will be used as the model definition
-  },
-];
-```
-
-Optionally we can provide additional references to resolve external references:
-
-```js
+// external references (array/object)
 const refs = [
   {
     id: 'dataTypes',
@@ -56,33 +26,72 @@ const refs = [
     },
   },
 ];
+
+// absolute directory for resolving local-refs
+const cwd = process.cwd();
+
+const jseq = new JSONSchemaSequelizer({
+  dialect: 'sqlite',
+  storage: ':memory:',
+}, refs, cwd);
 ```
 
-Once we've defined everything is time to instantiate some objects:
+The next thing is declaring your models:
 
 ```js
-const m = new JSONSchemaSequelizer(sequelize, models, refs);
+jseq.add({
+  // the $schema object is required at top-level
+  $schema: {
+    // model options placed here can be persisted
+    options: {
+      paranoid: true,
+      timestamps: false,
+    },
+
+    // the $schema.id is required (don't forget it!)
+    id: 'Tag',
+
+    // model fields
+    properties: {
+      // resolved from an external#/local reference (see below)
+      id: { $ref: 'dataTypes#/definitions/id' },
+
+      // regular fields
+      name: { type: 'string' },
+
+      // other references are used for associating things
+      children: { items: { $ref: 'Tag' } },
+    },
+    required: ['id', 'name'],
+  },
+  // any other property will be used as the model definition
+  hooks: {},
+  classMethods: {},
+  instanceMethods: {},
+});
 ```
 
-Now, `m` is an object holding all our defined models, along with their associations.
-
-Additionally we can call `m.sync()` to initialize our tables as needed.
+Start a new connection and start query objects:
 
 ```js
-m.sync().then(() => {
+jseq
+  .connect()
+  .then(() => jseq.models.Tag.sync())
+  .then(() => {
   // create a Tag with some children
-  m.Tag.create({
+  jseq.models.Tag.create({
     name: 'Root',
     children: [
       { name: 'Leaf' },
     ],
   }, {
     // including the association is simple
-    include: [m.Tag.refs.children]
+    include: [jseq.models.Tag.refs.children]
   })
   .then((tag) => {
     console.log(tag.get('name')); // Root
     console.log(tag.children[0].get('name')); // Leaf
+    });
   });
 });
 ```
@@ -90,7 +99,11 @@ m.sync().then(() => {
 Mocking models is far easier with JSON-Schema Faker:
 
 ```js
-console.log(JSON.stringify(m.Tag.faked.findOne(), null, 2));
+jseq.models.Tag
+  .faked
+  .findOne().then(result => {
+    console.log(JSON.stringify(result, null, 2));
+  });
 /*
 {
   "id": -80610000,

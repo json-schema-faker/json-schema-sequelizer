@@ -86,7 +86,7 @@ describe 'JSONSchemaSequelizer()', ->
           myPosts: [
             { title: 'Hello World', body: 'JSON-Schema rocks!' }
           ]
-        }, { include: [@jss.models.Blog.refs.myPosts] })
+        }, { include: [@jss.models.Blog.associations.myPosts] })
         .then (firstBlog) ->
           expect(firstBlog.myPosts[0].get('title')).toEqual 'Hello World'
           done()
@@ -95,7 +95,7 @@ describe 'JSONSchemaSequelizer()', ->
       @jss.models.Blog
         .create({
           featuredPost: { title: 'OSOM' }
-        }, { include: [@jss.models.Blog.refs.featuredPost] })
+        }, { include: [@jss.models.Blog.associations.featuredPost] })
         .then (firstBlog) ->
           expect(firstBlog.featuredPost.get('title')).toEqual 'OSOM'
           done()
@@ -108,7 +108,7 @@ describe 'JSONSchemaSequelizer()', ->
             { name: 'Ma' }
             { name: 'Uncle' }
           ]
-        }, { include: [@jss.models.Person.refs.children] })
+        }, { include: [@jss.models.Person.associations.children] })
         .then (familyTree) ->
           expect(familyTree.get('name')).toEqual 'Gran Ma'
           expect(familyTree.children[1].get('name')).toEqual 'Uncle'

@@ -64,5 +64,5 @@ describe 'Resources', ->
   it 'responds to edit', (done) ->
     JSONSchemaSequelizer.resource(@ctx, @jss.models.Test, 'edit')
       .then (result) ->
-        expect(result.get().$actions.Test.edit.path).toEqual '/test/:id/edit'
+        expect(result.get().actions.Test.edit.path).toEqual '/test/:id/edit'
         done()

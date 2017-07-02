@@ -1,7 +1,7 @@
 diff = require('../lib/diff')
 
-describe 'migrations', ->
-  it 'can build simple schemas', ->
+describe 'diff-builder', ->
+  it 'can up/down/change simple schemas', ->
     # no-schema
     a = {}
 
@@ -73,37 +73,35 @@ describe 'migrations', ->
 
     f = {}
 
-    console.log '=== A ---> B'
-    console.log '      ---> UP'
-    console.log diff.build(a, b, diff.map(a, b)).up
-    console.log '      ---> DOWN'
-    console.log diff.build(a, b, diff.map(a, b)).down
-    console.log()
+    A = diff.build(a, b, diff.map(a, b))
 
-    console.log '=== B ---> C'
-    console.log '      ---> UP'
-    console.log diff.build(b, c, diff.map(b, c)).up
-    console.log '      ---> DOWN'
-    console.log diff.build(b, c, diff.map(b, c)).down
-    console.log()
+    expect(A.up).toContain 'createTable'
+    expect(A.down).toContain 'dropTable'
 
-    console.log '=== C ---> D'
-    console.log '      ---> UP'
-    console.log diff.build(c, d, diff.map(c, d)).up
-    console.log '      ---> DOWN'
-    console.log diff.build(c, d, diff.map(c, d)).down
-    console.log()
+    B = diff.build(b, c, diff.map(b, c))
 
-    console.log '=== D ---> E'
-    console.log '      ---> UP'
-    console.log diff.build(d, e, diff.map(d, e)).up
-    console.log '      ---> DOWN'
-    console.log diff.build(d, e, diff.map(d, e)).down
-    console.log()
+    expect(B.change).toContain 'changeColumn'
+    expect(B.change).toContain 'autoIncrement'
+    expect(B.change).toContain 'ENUM'
 
-    console.log '=== E ---> F'
-    console.log '      ---> UP'
-    console.log diff.build(e, f, diff.map(e, f)).up
-    console.log '      ---> DOWN'
-    console.log diff.build(e, f, diff.map(e, f)).down
-    console.log()
+    C = diff.build(c, d, diff.map(c, d))
+
+    expect(C.up).toContain 'renameTable'
+    expect(C.up).toContain 'removeColumn'
+    expect(C.up).toContain 'addColumn'
+    expect(C.up).toContain 'roleType'
+    expect(C.up).toContain 'externalId'
+    expect(C.down).toContain 'removeColumn'
+    expect(C.down).toContain 'renameTable'
+    expect(C.down).toContain 'addColumn'
+
+    D = diff.build(d, e, diff.map(d, e))
+
+    expect(D.change).toContain 'changeColumn'
+    expect(D.change).toContain 'externalId'
+    expect(D.change).toContain 'STRING'
+
+    E = diff.build(e, f, diff.map(e, f))
+
+    expect(E.up).toContain 'dropTable'
+    expect(E.down).toContain 'createTable'

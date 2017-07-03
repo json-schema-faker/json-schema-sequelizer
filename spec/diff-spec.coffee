@@ -17,6 +17,9 @@ describe 'diff-builder', ->
           type: 'integer'
           autoIncrement: true
       required: ['id', 'access']
+      indexes: [{ # addIndex()
+        fields: ['access']
+      }]
     }
 
     # patched-schema
@@ -32,6 +35,12 @@ describe 'diff-builder', ->
           type: 'string' # changeColumn()
           enum: ['guest', 'user', 'admin']
       required: ['id', 'access']
+      indexes: [{
+        # removeIndex()
+        # addIndex()
+        name: 'foo'
+        fields: ['access']
+      }]
     }
 
     # enhanced-schema
@@ -52,6 +61,10 @@ describe 'diff-builder', ->
       required: ['role', 'externalId'] # change
       options: # set
         baz: 'buzz'
+      indexes: [{ # updateIndex() ?
+        name: 'foo'
+        fields: ['role', 'externalId']
+      }]
     }
 
     # additional-schema
@@ -69,6 +82,7 @@ describe 'diff-builder', ->
         externalId: # changeColumn()
           type: 'string'
       required: ['roleType', 'externalId']
+      # removeIndex()
     }
 
     @f = {}
@@ -81,39 +95,41 @@ describe 'diff-builder', ->
     expect(A).toContain 'primaryKey: true'
     expect(A).toContain 'dataTypes.INTEGER'
     expect(A).toContain "dropTable('TEST')"
+    expect(A).toContain 'addIndex'
+    expect(A).toContain 'removeIndex'
 
-  # it 'can alter columns', ->
-  #   B = diff.build(@b, @c, diff.map(@b, @c))
+  it 'can alter columns', ->
+    B = diff.build('TEST', @b, @c, diff.map(@b, @c))
 
-  #   expect(B).toContain 'changeColumn'
-  #   expect(B).toContain 'autoIncrement'
-  #   expect(B).toContain 'ENUM'
+    expect(B).toContain 'changeColumn'
+    expect(B).toContain 'autoIncrement'
+    expect(B).toContain 'ENUM'
 
-  # it 'can add/rename/destroy', ->
-  #   C = diff.build(@c, @d, diff.map(@c, @d))
+  it 'can add/rename/destroy', ->
+    C = diff.build('TEST', @c, @d, diff.map(@c, @d))
 
-  #   expect(C).toContain 'renameTable'
-  #   expect(C).toContain 'removeColumn'
-  #   expect(C).toContain 'addColumn'
-  #   expect(C).toContain 'role'
-  #   expect(C).toContain 'ENUM'
-  #   expect(C).toContain 'editor'
-  #   expect(C).toContain 'externalId'
-  #   expect(C).toContain 'removeColumn'
-  #   expect(C).toContain 'renameTable'
-  #   expect(C).toContain 'addColumn'
+    expect(C).toContain 'renameTable'
+    expect(C).toContain 'removeColumn'
+    expect(C).toContain 'addColumn'
+    expect(C).toContain 'role'
+    expect(C).toContain 'ENUM'
+    expect(C).toContain 'editor'
+    expect(C).toContain 'externalId'
+    expect(C).toContain 'removeColumn'
+    expect(C).toContain 'renameTable'
+    expect(C).toContain 'addColumn'
 
-  # it 'will alter columns', ->
-  #   D = diff.build(@d, @e, diff.map(@d, @e))
+  it 'will alter columns', ->
+    D = diff.build('TEST', @d, @e, diff.map(@d, @e))
 
-  #   expect(D).toContain 'renameColumn'
-  #   expect(D).toContain 'renameColumn'
-  #   expect(D).toContain 'changeColumn'
-  #   expect(D).toContain 'externalId'
-  #   expect(D).toContain 'STRING'
+    expect(D).toContain 'renameColumn'
+    expect(D).toContain 'renameColumn'
+    expect(D).toContain 'changeColumn'
+    expect(D).toContain 'externalId'
+    expect(D).toContain 'STRING'
 
-  # it 'will revert things', ->
-  #   E = diff.build(@e, @f, diff.map(@e, @f))
+  it 'will revert things', ->
+    E = diff.build('TEST', @e, @f, diff.map(@e, @f))
 
-  #   expect(E).toContain "dropTable('Example')"
-  #   expect(E).toContain "createTable('Example',"
+    expect(E).toContain "dropTable('Example')"
+    expect(E).toContain "createTable('Example',"

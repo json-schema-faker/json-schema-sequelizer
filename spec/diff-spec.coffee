@@ -1,5 +1,9 @@
 diff = require('../lib/diff')
 
+$refs =
+  TEST:
+    tableName: 'OTHER'
+
 describe 'diff-builder', ->
   beforeEach ->
     # no-schema
@@ -88,25 +92,25 @@ describe 'diff-builder', ->
     @f = {}
 
   it 'can create/destroy tables', ->
-    A = diff.build('TEST', @a, @b, diff.map(@a, @b))
+    A = diff.build('TEST', $refs, @a, @b, diff.map(@a, @b))
 
-    expect(A).toContain "createTable('TEST',"
+    expect(A).toContain "createTable('OTHER',"
     expect(A).toContain 'autoIncrement: true'
     expect(A).toContain 'primaryKey: true'
     expect(A).toContain 'dataTypes.INTEGER'
-    expect(A).toContain "dropTable('TEST')"
+    expect(A).toContain "dropTable('OTHER')"
     expect(A).toContain 'addIndex'
     expect(A).toContain 'removeIndex'
 
   it 'can alter columns', ->
-    B = diff.build('TEST', @b, @c, diff.map(@b, @c))
+    B = diff.build('TEST', $refs, @b, @c, diff.map(@b, @c))
 
     expect(B).toContain 'changeColumn'
     expect(B).toContain 'autoIncrement'
     expect(B).toContain 'ENUM'
 
   it 'can add/rename/destroy', ->
-    C = diff.build('TEST', @c, @d, diff.map(@c, @d))
+    C = diff.build('TEST', $refs, @c, @d, diff.map(@c, @d))
 
     expect(C).toContain 'renameTable'
     expect(C).toContain 'removeColumn'
@@ -120,7 +124,7 @@ describe 'diff-builder', ->
     expect(C).toContain 'addColumn'
 
   it 'will alter columns', ->
-    D = diff.build('TEST', @d, @e, diff.map(@d, @e))
+    D = diff.build('TEST', $refs, @d, @e, diff.map(@d, @e))
 
     expect(D).toContain 'renameColumn'
     expect(D).toContain 'renameColumn'
@@ -129,7 +133,7 @@ describe 'diff-builder', ->
     expect(D).toContain 'STRING'
 
   it 'will revert things', ->
-    E = diff.build('TEST', @e, @f, diff.map(@e, @f))
+    E = diff.build('TEST', $refs, @e, @f, diff.map(@e, @f))
 
     expect(E).toContain "dropTable('Example')"
     expect(E).toContain "createTable('Example',"

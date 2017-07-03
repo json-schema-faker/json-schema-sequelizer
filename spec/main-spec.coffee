@@ -46,7 +46,7 @@ describe 'JSONSchemaSequelizer()', ->
       @jss.models.Example.create({ name: 'OSOM' })
         .then (b) ->
           expect(b.get('name')).toEqual('OSOM')
-          #expect(b.now instanceof Date).toBe true
+          expect(b.now instanceof Date).toBe true
         .then -> done()
 
   describe 'virtual types', ->

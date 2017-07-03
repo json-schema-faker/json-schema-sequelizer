@@ -76,45 +76,44 @@ describe 'diff-builder', ->
   it 'can create/destroy tables', ->
     A = diff.build(@a, @b, diff.map(@a, @b))
 
-    expect(A.up).toContain "createTable('Test',"
-    expect(A.up).toContain 'autoIncrement: true'
-    expect(A.up).toContain 'primaryKey: true'
-    expect(A.up).toContain 'dataTypes.INTEGER'
-
-    expect(A.down).toContain "dropTable('Test')"
+    expect(A).toContain "createTable('Test',"
+    expect(A).toContain 'autoIncrement: true'
+    expect(A).toContain 'primaryKey: true'
+    expect(A).toContain 'dataTypes.INTEGER'
+    expect(A).toContain "dropTable('Test')"
 
   it 'can alter columns', ->
     B = diff.build(@b, @c, diff.map(@b, @c))
 
-    expect(B.change).toContain 'changeColumn'
-    expect(B.change).toContain 'autoIncrement'
-    expect(B.change).toContain 'ENUM'
+    expect(B).toContain 'changeColumn'
+    expect(B).toContain 'autoIncrement'
+    expect(B).toContain 'ENUM'
 
   it 'can add/rename/destroy', ->
     C = diff.build(@c, @d, diff.map(@c, @d))
 
-    expect(C.up).toContain 'renameTable'
-    expect(C.up).toContain 'removeColumn'
-    expect(C.up).toContain 'addColumn'
-    expect(C.up).toContain 'role'
-    expect(C.up).toContain 'ENUM'
-    expect(C.up).toContain 'editor'
-    expect(C.up).toContain 'externalId'
-    expect(C.down).toContain 'removeColumn'
-    expect(C.down).toContain 'renameTable'
-    expect(C.down).toContain 'addColumn'
+    expect(C).toContain 'renameTable'
+    expect(C).toContain 'removeColumn'
+    expect(C).toContain 'addColumn'
+    expect(C).toContain 'role'
+    expect(C).toContain 'ENUM'
+    expect(C).toContain 'editor'
+    expect(C).toContain 'externalId'
+    expect(C).toContain 'removeColumn'
+    expect(C).toContain 'renameTable'
+    expect(C).toContain 'addColumn'
 
   it 'will alter columns', ->
     D = diff.build(@d, @e, diff.map(@d, @e))
 
-    expect(D.up).toContain 'renameColumn'
-    expect(D.down).toContain 'renameColumn'
-    expect(D.change).toContain 'changeColumn'
-    expect(D.change).toContain 'externalId'
-    expect(D.change).toContain 'STRING'
+    expect(D).toContain 'renameColumn'
+    expect(D).toContain 'renameColumn'
+    expect(D).toContain 'changeColumn'
+    expect(D).toContain 'externalId'
+    expect(D).toContain 'STRING'
 
   it 'will revert things', ->
     E = diff.build(@e, @f, diff.map(@e, @f))
 
-    expect(E.up).toContain "dropTable('Example')"
-    expect(E.down).toContain "createTable('Example',"
+    expect(E).toContain "dropTable('Example')"
+    expect(E).toContain "createTable('Example',"

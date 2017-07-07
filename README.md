@@ -63,50 +63,57 @@ builder.add({
 
 builder.connect()
   .then(() => {
-    // full-dereferences schemas, e.g.
-    const fixedSchemas = Object.keys(builder.models).map(m => builder.refs[m].$schema);
+    // full-dereferenced schemas, e.g.
+    const set = Object.keys(builder.models).map(m => builder.refs[m].$schema);
 
     // dump current schema
-    const bundle = JSONSchemaSequelizer.bundle(fixedSchemas, definitions, 'Latest changes!');
+    const bundle = JSONSchemaSequelizer.bundle(set, definitions, 'Latest changes!');
 
     // save all schemas as single JSON-Schema
     require('fs').writeFileSync('current_schema.json', JSON.stringify(bundle, null, 2));
-
+  })
+  .then(() => {
     // if true, all up/down/change calls will be merged
     const squashMigrations = true;
 
     // dump migration code
-    return JSONSchemaSequelizer.generate({}, builder.models, squashMigrations)
-      .then(result => {
-        // save as module
-        require('fs').writeFileSync('current_schema.js', result.code);
-
-        // if true, will bind the given arguments for run as migrations,
-        // otherwise it will instantiate a wrapper around `umzg`
-        const bindMethods = true;
-
-        // this can be a module, or json-object
-        const options = require('./current_schema');
-
-        // execute migration from code
-        return JSONSchemaSequelizer
-          .migrate(builder.sequelize, options, bindMethods)
-          .up()
-          // store a single value
-          .then(() => builder.models.Test.create({
-            value: 'Done.',
-          }))
-          // retrieve from database
-          .then(() => builder.models.Test.findOne())
-          .then(test => console.log(test.value))
-          // fake from given schema
-          .then(() => builder.models.Test.faked.findAll())
-          .then(data => console.log(data));
-      });
+    return JSONSchemaSequelizer.generate({}, builder.models, squashMigrations);
   })
+  .then(result => {
+    // save as module
+    require('fs').writeFileSync('current_schema.js', result.code);
+
+    // if true, will bind the given arguments for run as migrations,
+    // otherwise it will instantiate a wrapper around `umzg`
+    const bindMethods = true;
+
+    // this can be a module, or json-object
+    const options = require('./current_schema');
+
+    // execute migration from code
+    return JSONSchemaSequelizer
+      .migrate(builder.sequelize, options, bindMethods)
+      .up();
+  })
+
+  // store a single value
+  .then(() => builder.models.Test.create({
+    value: 'Done.',
+  }))
+
+  // retrieve from database
+  .then(() => builder.models.Test.findOne())
+  .then(test => console.log(test.value))
+
+  // fake from given schema
+  .then(() => builder.models.Test.faked.findAll())
+  .then(data => console.log(data))
+
+  // trap errors
   .catch(e => {
     console.log(e.stack);
   });
+
 ```
 
 ## Options
@@ -171,7 +178,7 @@ builder.connect()
 - `async(models, options)`
 &mdash;
 
-- `clear(models, options, whereOptions)`
+- `clear(models, options)`
 &mdash;
 
 ## Example

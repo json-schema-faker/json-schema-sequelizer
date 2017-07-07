@@ -10,9 +10,171 @@ $ npm i json-schema-sequelizer --save
 
 _This is a **work in progress**, any feedback is very welcome!_
 
-## Basic usage
+## Features
 
-First you'll need a new connection, e.g.
+- Model definitions are JSON-Schema
+- Associations are made from `$ref`s
+- Migrations generator/runner
+- Abstract CRUD builder
+
+## Usage
+
+```js
+const JSONSchemaSequelizer = require('json-schema-sequelizer');
+
+// connection settings for Sequelize
+const settings = {
+  dialect: 'sqlite',
+  storage: ':memory:',
+};
+
+// external references (not models)
+// can be an array or object
+const definitions = {
+  dataTypes: {
+    definitions: {
+      PK: {
+        type: 'integer',
+        minimum: 1,
+        primaryKey: true,
+        autoIncrement: true,
+      },
+    },
+  },
+};
+
+// resolve local references from this directory
+const builder = new JSONSchemaSequelizer(settings, definitions, process.cwd());
+
+// add a dummy model
+builder.add({
+  $schema: {
+    id: 'Test',
+    properties: {
+      id: {
+        $ref: 'dataTypes#/definitions/PK',
+      },
+      value: {
+        type: 'string',
+      },
+    },
+  },
+});
+
+builder.connect()
+  .then(() => {
+    // full-dereferences schemas, e.g.
+    const fixedSchemas = Object.keys(builder.models).map(m => builder.refs[m].$schema);
+
+    // dump current schema
+    const bundle = JSONSchemaSequelizer.bundle(fixedSchemas, definitions, 'Latest changes!');
+
+    // save all schemas as single JSON-Schema
+    require('fs').writeFileSync('current_schema.json', JSON.stringify(bundle, null, 2));
+
+    // if true, all up/down/change calls will be merged
+    const squashMigrations = true;
+
+    // dump migration code
+    return JSONSchemaSequelizer.generate({}, builder.models, squashMigrations)
+      .then(result => {
+        // save as module
+        require('fs').writeFileSync('current_schema.js', result.code);
+
+        // if true, will bind the given arguments for run as migrations,
+        // otherwise it will instantiate a wrapper around `umzg`
+        const bindMethods = true;
+
+        // this can be a module, or json-object
+        const options = require('./current_schema');
+
+        // execute migration from code
+        return JSONSchemaSequelizer
+          .migrate(builder.sequelize, options, bindMethods)
+          .up()
+          // store a single value
+          .then(() => builder.models.Test.create({
+            value: 'Done.',
+          }))
+          // retrieve from database
+          .then(() => builder.models.Test.findOne())
+          .then(test => console.log(test.value))
+          // fake from given schema
+          .then(() => builder.models.Test.faked.findAll())
+          .then(data => console.log(data));
+      });
+  })
+  .catch(e => {
+    console.log(e.stack);
+  });
+```
+
+## Options
+
+- `settings`
+&mdash;
+
+- `refs`
+&mdash;
+
+- `cwd`
+&mdash;
+
+## Instance properties
+
+- `sequelize`
+&mdash;
+
+- `models`
+&mdash;
+
+- `refs`
+&mdash;
+
+## Instance methods
+
+- `add()`
+&mdash;
+
+- `scan()`
+&mdash;
+
+- `sync()`
+&mdash;
+
+- `close()`
+ &mdash;
+
+- `connect()`
+&mdash;
+
+- `hydrate()`
+ &mdash;
+
+- `rehydrate()`
+&mdash;
+
+## Static methods
+
+- `bundle(schemas, definitions, description)`
+  &mdash;
+
+- `generate(dump, models, definitions, squashMigrations)`
+  &mdash;
+
+- `resource(ctx, model, action)`
+&mdash;
+
+- `migrate(sequelize, options, bind)`
+&mdash;
+
+- `async(models, options)`
+&mdash;
+
+- `clear(models, options, whereOptions)`
+&mdash;
+
+## Example
 
 ```js
 const JSONSchemaSequelizer = require('json-schema-sequelizer');
@@ -178,3 +340,4 @@ Additionally you can pass an object to provide options to the association, e.g.
 Special keys like `model` and `through` are resolved before making the association.
 
 E.g., if you've defined `OtherModel` it will be used instead, otherwise the options are passed as is to Sequelize (which in turn can create the intermediate table as well).
+

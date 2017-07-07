@@ -1093,9 +1093,9 @@ jsbn@~0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/jsbn/-/jsbn-0.1.0.tgz#650987da0dd74f4ebf5a11377a2aa2d273e97dfd"
 
-json-schema-faker@0.5.0-rc6:
-  version "0.5.0-rc6"
-  resolved "https://registry.yarnpkg.com/json-schema-faker/-/json-schema-faker-0.5.0-rc6.tgz#3cce7af89d5ce04025970430934fb1ced1675d5b"
+json-schema-faker@0.5.0-rc8:
+  version "0.5.0-rc8"
+  resolved "https://registry.yarnpkg.com/json-schema-faker/-/json-schema-faker-0.5.0-rc8.tgz#2803efd7c145957f18a512e6e23e319e3ccbf599"
   dependencies:
     deref "^0.7.0"
     json-schema-ref-parser "^3.1.2"

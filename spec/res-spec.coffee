@@ -4,20 +4,6 @@ t = require('./_sequelize')
 describe 'Resources', ->
   beforeEach (done) ->
     @ctx =
-      routes: (x) ->
-        if x is 'Test'
-          url =
-            url: -> '/test'
-            path: '/test'
-            verb: 'GET'
-          url.new = url: (-> '/test'), path: '/test', verb: 'GET'
-          url.edit = url: (-> '/test/:id/edit'), path: '/test/:id/edit', verb: 'GET'
-          url.show = url: (-> '/test/:id'), path: '/test/:id', verb: 'GET'
-          url.create = url: (-> '/test'), path: '/test', verb: 'POST'
-          url.update = url: (-> '/test/:id'), path: '/test/:id', verb: 'PUT'
-          url.destroy = url: (-> '/test/:id'), path: '/test/:id', verb: 'DELETE'
-          url
-
       params:
         id: 1
 
@@ -37,32 +23,36 @@ describe 'Resources', ->
             type: 'string'
 
     @jss.sync({ force: true })
-      .then ->
+      .then =>
+        @jss.models.Test.create(value: 'foo')
+      .then =>
+        @jss.models.Test.create(value: 'bar')
+      .then =>
+        @res = JSONSchemaSequelizer.resource(@jss.models.Test)
+
+        # required for actions
+        @jss.models.Test.options.$uiFields =
+          findAll: [
+            { prop: 'value' }
+          ]
+
         done()
 
-  it 'responds to index', (done) ->
-    JSONSchemaSequelizer.resource(@ctx, @jss.models.Test, 'index')
-      .then (result) ->
-        expect(result.data).toEqual []
-        done()
+  it 'responds to findAll (index)', (done) ->
+    @res.actions.findAll()
+    .then (result) ->
+      expect(result[0].value).toEqual 'foo'
+      expect(result[1].value).toEqual 'bar'
+      done()
 
-  it 'responds to new', (done) ->
-    JSONSchemaSequelizer.resource(@ctx, @jss.models.Test, 'new')
-      .then (result) ->
-        expect(result.isNew).toBe true
-        done()
+  it 'responds to findOne (edit|show)', (done) ->
+    @res.actions.findOne()
+    .then (result) ->
+      expect(result.value).toEqual 'foo'
+      done()
 
   it 'responds to create', (done) ->
-    @ctx.params.payload =
-      value: 'OSOM'
-
-    JSONSchemaSequelizer.resource(@ctx, @jss.models.Test, 'create')
-      .then (data) ->
-        expect(data.result.value).toEqual 'OSOM'
-        done()
-
-  it 'responds to edit', (done) ->
-    JSONSchemaSequelizer.resource(@ctx, @jss.models.Test, 'edit')
+    @res.actions.create(value: 'OSOM')
       .then (result) ->
-        expect(result.get().actions.Test.edit.path).toEqual '/test/:id/edit'
+        expect(result.value).toEqual 'OSOM'
         done()

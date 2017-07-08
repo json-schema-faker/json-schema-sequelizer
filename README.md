@@ -107,13 +107,15 @@ builder.connect()
         { name: 'Leaf' },
       ],
     }, {
-      // including the association is simple
+      // associations are set explicitly
       include: [builder.models.Tag.associations.children]
     });
   })
   .then(tag => {
-    console.log(tag.get('name')); // Root
-    console.log(tag.children[0].get('name')); // Leaf
+    console.log(tag.id); // 1
+    console.log(tag.name); // Root
+    console.log(tag.children[0].id); // 2
+    console.log(tag.children[0].name); // Leaf
   })
 ```
 
@@ -186,18 +188,18 @@ builder.connect()
       .migrate(builder.sequelize, options, bindMethods)
       .up();
   })
-  .catch(e => {
-    console.log(e.stack);
-  });
 ```
 
 ## Faking data
 
 ```js
-builder.models.Tag
-  .faked.findOne().then(result => {
-    console.log(JSON.stringify(result, null, 2));
-  });
+  .then(() => {
+    // just prefix your calls and voila
+    return builder.models.Tag
+      .faked.findOne().then(result => {
+        console.log(JSON.stringify(result, null, 2));
+      });
+  })
 /*
 {
   "id": -80610000,
@@ -254,6 +256,203 @@ builder.models.Tag
 */
 ```
 
+## Resources
+
+```js
+  .then(() => {
+    // prepare the resource handler
+    const res = JSONSchemaSequelizer.resource(builder.models.Tag);
+
+    // resource details, references and UI
+    console.log(JSON.stringify(res.options, null, 2));
+    /*
+    {
+      "ref": {
+        "primaryKey": "id",
+        "singular": "Tag",
+        "plural": "Tags",
+        "model": "Tag"
+      },
+      "refs": {
+        "children": {
+          "type": "HasMany",
+          "model": "Tag",
+          "plural": "Tags",
+          "singular": "Tag",
+          "foreignKey": "TagId",
+          "primaryKey": "id"
+        }
+      },
+      "schema": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "name": {
+            "type": "string"
+          },
+          "children": {
+            "items": {
+              "$ref": "Tag"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "uiSchema": {},
+      "uiFields": {}
+    }
+    */
+
+    // try several actions in order
+    return Promise.resolve()
+      .then(() => {
+        // associations are automatic
+        return res.actions.create({
+          name: 'Root',
+          children: [
+            { name: 'Leaf A' },
+            { name: 'Leaf B' },
+          ],
+        })
+        .then(result => {
+          console.log(result.id); // 3
+          console.log(result.name); // Root
+          console.log(result.children[0].id); // 4
+          console.log(result.children[0].name); // Leaf A
+          console.log(result.children[1].name); // Leaf B
+        });
+      })
+      .then(() => {
+        return res.actions.update({
+          name: 'Roots',
+          children: [
+            { name: 'Leaf X', id: 4 },
+          ],
+        }, { id: 3 });
+      })
+      .then(() => {
+        // attribute filters are taken from uiFields
+        builder.models.Tag.options.$uiFields = {
+          findOne: [
+            { prop: 'name' },
+            { prop: 'children.name' },
+          ],
+        };
+
+        return res.actions.findOne({
+          id: 3,
+        }).then(result => {
+          console.log(result.name); // Roots
+          console.log(result.children[0].name); // Leaf X
+          console.log(result.children[1].name); // Leaf B
+        });
+      });
+  })
+```
+
+## CRUD example
+
+```js
+  .then(() => {
+    // instantiate a plain http-server
+    require('http').createServer((req, res) => {
+      // extract the params from the given URL, e.g. /Model/ID
+      const parts = req.url.split('?')[0].split('/');
+      const model = parts[1];
+      const param = parts[2];
+
+      // finalize the request as JSON
+      function end(result, headers) {
+        let status = 200;
+
+        if (typeof result === 'number') {
+          status = result;
+          result = arguments[1];
+          headers = arguments[2];
+        }
+
+        res.writeHead(status, {
+          'Content-Type': 'application/json',
+        });
+
+        res.end(JSON.stringify(result));
+      }
+
+      // no given model, return resource list
+      if (!model) {
+        end({
+          resources: Object.keys(builder.models),
+        });
+        return;
+      }
+
+      // resource handler and options
+      const obj = JSONSchemaSequelizer.resource(builder.models[model]);
+
+      // filters for the current resource
+      const where = {
+        [obj.options.ref.primaryKey]: param,
+      };
+
+      // model found
+      if (builder.models[model]) {
+        // write operations
+        if (req.method === 'POST') {
+          let data = '';
+
+          // try to read input as JSON
+          req.setEncoding('utf8');
+          req.on('data', chunk => {
+            data += chunk;
+          });
+
+          req.on('end', () => {
+            try {
+              const payload = JSON.parse(data);
+
+              if (param) {
+                obj.actions.update(payload, where).then(end);
+              } else {
+                obj.actions.create(payload).then(end);
+              }
+            } catch (e) {
+              end(400, { error: e.message });
+            }
+          });
+        } else if (param) {
+          // found params, read/destroy
+          if (req.method === 'DELETE') {
+            obj.actions.destroy(where).then(end);
+          } else {
+            obj.actions.findOne(where).then(end);
+          }
+        } else {
+          // return resource options
+          end(obj.options);
+        }
+      } else {
+        // unknown resource
+        end(400, { error: 'unknown' });
+      }
+    })
+    .listen(8080);
+
+    console.log('Server running at http://localhost:8080/');
+
+    // try `curl -H "Content-Type: application/json" -X POST -d '{"name":"TEST"}' http://localhost:8080/Tag/1`
+    // and then `curl http://localhost:8080/Tag/1`
+  })
+  .catch(e => {
+    console.log(e.stack);
+  });
+```
+
+
 ## Associations
 
 Relationships between models are declared with references:
@@ -261,17 +460,29 @@ Relationships between models are declared with references:
 - `hasOne` &larr; `{ x: { $ref: 'Model' } }`
 - `hasMany` &larr; `{ x: { items: { $ref: 'Model' } } }`
 - `belongsTo` &larr; `{ x: { $ref: 'Model', belongsTo: true } }`
-- `belongsToMany` &larr; `{ x: { $ref: 'Model', belongsToMany: true } }`
+- `belongsToMany` &larr; `{ x: { items: { $ref: 'Model', belongsToMany: true } } }`
 
 Additionally you can pass an object to provide options to the association, e.g.
 
 ```js
-{ x: { $ref: 'Model', belongsToMany: { through: 'OtherModel' } } }
+{
+  $schema: {
+    id: 'Post',
+    properties: {
+      tags: {
+        items: {
+          $ref: 'Tag',
+          belongsToMany: {
+            through: 'PostTags',
+          },
+        },
+      },
+    },
+  },
+}
 ```
 
-Special keys like `model` and `through` are resolved before making the association.
-
-E.g., if you've defined `OtherModel` it will be used instead, otherwise the options are passed as is to Sequelize (which in turn can create the intermediate table as well).
+E.g., if you've defined `PostTags` it will be used instead, otherwise the options are passed as is to Sequelize (which in turn can create the intermediate table as well).
 
 ## Options
 
@@ -297,13 +508,13 @@ E.g., if you've defined `OtherModel` it will be used instead, otherwise the opti
 
 ## Instance methods
 
-- `add()`
+- `add(definition)`
 &mdash;
 
-- `scan()`
+- `scan(callback)`
 &mdash;
 
-- `sync()`
+- `sync(options)`
 &mdash;
 
 - `close()`
@@ -312,10 +523,10 @@ E.g., if you've defined `OtherModel` it will be used instead, otherwise the opti
 - `connect()`
 &mdash;
 
-- `hydrate()`
+- `hydrate(bundle)`
  &mdash;
 
-- `rehydrate()`
+- `rehydrate(dump)`
 &mdash;
 
 ## Static methods

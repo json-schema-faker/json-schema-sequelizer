@@ -49,8 +49,10 @@ const builder = new JSONSchemaSequelizer(settings, definitions, process.cwd());
 
 ## Definition
 
+Models are just Javascript objects:
+
 ```js
-// add a dummy model
+// add a Tag model
 builder.add({
   // the $schema object is required at top-level
   $schema: {
@@ -96,6 +98,8 @@ builder.add({
 
 ## Basic usage
 
+For interacting with your models you need a connection:
+
 ```js
 builder.connect()
   .then(() => builder.models.Tag.sync())
@@ -121,7 +125,21 @@ builder.connect()
 
 ## Migrations
 
+Get free code for migrating your database:
+
+1. Add or change as many models and definitions you need
+2. The first time, generate javascript code passing an empty `previousBundle`
+3. Just call `JSONSchemaSequelizer.migrate(..., yourMigration, true).up()`
+4. Save a snapshot of the current schema with `JSONSchemaSequelizer.bundle(...)`
+5. The next time, use this (latest) snapshot when calling `JSONSchemaSequelizer.generate(...)`
+6. This will generate javascript code with the differences only, save them and repeat (4)
+7. After this point you can use the umzug wrapper for all the generated migrations (1, 5, 6, ...)
+
+> All migration methods will return promises, ensure you `catch` everything.
+
 ### Snapshots
+
+Bundle all your definitions:
 
 ```js
   .then(() => {
@@ -140,6 +158,8 @@ builder.connect()
 ```
 
 ### Generating code
+
+Exporting and loading changes:
 
 ```js
   .then(() => {
@@ -174,6 +194,8 @@ builder.connect()
 
 ### Migrating from code
 
+Initial or full migrations:
+
 ```js
   .then(() => {
     // if true, will bind the given arguments for run as migrations,
@@ -191,6 +213,8 @@ builder.connect()
 ```
 
 ## Faking data
+
+Built-in support for [json-schema-faker](http://json-schema-faker.js.org/):
 
 ```js
   .then(() => {
@@ -257,6 +281,8 @@ builder.connect()
 ```
 
 ## Resources
+
+Abstract methods for CRUDs:
 
 ```js
   .then(() => {
@@ -356,6 +382,8 @@ builder.connect()
 ```
 
 ## CRUD example
+
+RESTful API in ~70 LOC:
 
 ```js
   .then(() => {
@@ -486,65 +514,30 @@ E.g., if you've defined `PostTags` it will be used instead, otherwise the option
 
 ## Options
 
-- `settings`
-&mdash;
-
-- `refs`
-&mdash;
-
-- `cwd`
-&mdash;
+- `settings` &mdash; Connection settings for Sequelize. Any supported value for `new Sequelize(settings)` is fine
+- `refs` &mdash; Additional references for definitions. Can be an object or an array, schemas should have a valid id property.
+- `cwd` &mdash; Local references resolve from here. If not provided it will use `process.cwd()`
 
 ## Instance properties
 
-- `sequelize`
-&mdash;
-
-- `models`
-&mdash;
-
-- `refs`
-&mdash;
+- `sequelize` &mdash; Holds the current Sequelize connection
+- `models` &mdash; A proxy for `sequelize.models`
+- `refs` &mdash; All registered schemas. Additional fields will be present as result of associated models
 
 ## Instance methods
 
-- `add(definition)`
-&mdash;
-
-- `scan(callback)`
-&mdash;
-
-- `sync(options)`
-&mdash;
-
-- `close()`
- &mdash;
-
-- `connect()`
-&mdash;
-
-- `hydrate(bundle)`
- &mdash;
-
-- `rehydrate(dump)`
-&mdash;
+- `add(definition)` &mdash; Define a new model on Sequelize. The `$schema` property is mandatory for modules only (this way), everything else will become the Sequelize model
+- `scan(callback)` &mdash; Scan models and definitions from given `cwd`. Only JSON files does not require the top-level `$schema` keyword
+- `sync(options)` &mdash; Calls `sequelize.sync()` with the given options
+- `close()` &mdash; Calls `sequelize.close()`
+- `connect()` &mdash; Starts a new Sequelize connection once. Next calls will receive the same connection instance
+- `rehydrate(bundle)`&mdash; Load given bundle on the current connection. Useful for recreating the database structure from JSON-Schema
 
 ## Static methods
 
-- `bundle(schemas, definitions, description)`
-  &mdash;
-
-- `generate(dump, models, definitions, squashMigrations)`
-  &mdash;
-
-- `resource(ctx, model, action)`
-&mdash;
-
-- `migrate(sequelize, options, bind)`
-&mdash;
-
-- `async(models, options)`
-&mdash;
-
-- `clear(models, options)`
-&mdash;
+- `bundle(schemas, definitions, description)`  &mdash; Generate a bundle with all models and additional references as JSON-Schema
+- `generate(dump, models, definitions, squashMigrations)`  &mdash; Generate javascript code of the current schema in form of migrations
+- `resource(model, options)`&mdash; Abstract CRUD wrapper
+- `migrate(sequelize, options, bind)`&mdash; Executes a plain migration if `bind` is `true`, instantiate a umzug wrapper otherwise. When binding ensure you pass a valid object with `up/down/change` functions
+- `sync(models, options)`&mdash; WIll call `sequelize.sync()` by executing definitions in order, all dependencies are synced first, dependants last
+- `clear(models, options)`&mdash; Will call `model.destroy()` on each instance, providing a `truncate` or `where` option is mandatory

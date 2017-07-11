@@ -86,6 +86,18 @@ builder.add({
     },
     required: ['id', 'name'],
   },
+  // UI-specific details
+  $uiSchema: {
+    // use with react-jsonschema-form (built-in)
+  },
+  // RESTful settings
+  $attributes: {
+    // ensure all read-operations retrieve Tag's name
+    // for individual actions try setting up `findOne`
+    findAll: [
+      'name'
+    ],
+  },
   // any other property will be used as the model definition
   hooks: {},
   getterMethods: {},
@@ -330,7 +342,6 @@ Abstract methods for CRUDs:
         ]
       },
       "uiSchema": {},
-      "uiFields": {}
     }
     */
 

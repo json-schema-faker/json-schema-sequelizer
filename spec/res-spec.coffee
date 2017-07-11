@@ -31,7 +31,7 @@ describe 'Resources', ->
         @res = JSONSchemaSequelizer.resource(@jss.models.Test)
 
         # required for actions
-        @jss.models.Test.options.$uiFields =
+        @jss.models.Test.options.$attributes =
           findAll: [
             { prop: 'value' }
           ]

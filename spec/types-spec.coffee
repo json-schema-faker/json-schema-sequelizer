@@ -81,7 +81,7 @@ describe 'Types support', ->
         minLength: 10
         maxLength: 30
 
-      expect(types.constraintSchema(test)).toEqual { validate: len: [10, 30] }
+      expect(types.constraintSchema(test).validate).toEqual { len: [10, 30] }
 
   describe 'Postgres', ->
     it 'should support ENUM types', (done) ->

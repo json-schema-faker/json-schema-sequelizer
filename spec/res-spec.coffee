@@ -3,14 +3,6 @@ t = require('./_sequelize')
 
 describe 'Resources', ->
   beforeEach (done) ->
-    @ctx =
-      params:
-        id: 1
-
-      resources:
-        Test:
-          controller: 'Test'
-
     @jss = t.setup
       dialect: 'sqlite'
       storage: ':memory:'
@@ -62,18 +54,7 @@ describe 'Resources', ->
 
     @jss.sync({ force: true })
       .then =>
-        @jss.models.Test.create(value: 'foo')
-      .then =>
-        @jss.models.Test.create(value: 'bar')
-      .then =>
         @res = JSONSchemaSequelizer.resource(@jss.refs, @jss.models.Cart)
-
-        # required for actions
-        @jss.models.Test.options.$attributes =
-          findAll: [
-            { prop: 'value' }
-          ]
-
         done()
 
   it 'should keep references', ->
@@ -100,27 +81,22 @@ describe 'Resources', ->
     expect(@res.options.refs.cart.plural).toEqual 'virtualTestQties'
     expect(@res.options.refs.cart.singular).toEqual 'virtualTestQty'
     expect(@res.options.refs.cart.references).toEqual {
-      primaryKey: null
+      primaryKey: null,
       foreignKey: null
     }
 
-  # it 'responds to findAll (index)', (done) ->
-  #   @res.actions.findAll()
-  #   .then () => @jss.models.Test.count()
-  #   .then (result) ->
-  #     console.log result
-  #     #expect(result[0].value).toEqual 'foo'
-  #     #expect(result[1].value).toEqual 'bar'
-  #     done()
+  it 'responds to create -> findAll/findOne', (done) ->
+    @test = JSONSchemaSequelizer.resource(@jss.refs, @jss.models.Test)
 
-  # # it 'responds to findOne (edit|show)', (done) ->
-  # #   @res.actions.findOne()
-  # #   .then (result) ->
-  # #     expect(result.value).toEqual 'foo'
-  # #     done()
+    @jss.models.Test.options.$attributes =
+      findAll: ['value']
 
-  # # it 'responds to create', (done) ->
-  # #   @res.actions.create(value: 'OSOM')
-  # #     .then (result) ->
-  # #       expect(result.value).toEqual 'OSOM'
-  # #       done()
+    Promise.resolve()
+      .then => @test.actions.create(value: 'OSOM')
+      .then (result) -> expect(result.value).toEqual 'OSOM'
+      .then => @test.actions.findOne()
+      .then (result) -> expect(result.value).toEqual 'OSOM'
+      .then => @test.actions.findAll()
+      .then (result) -> expect(result[0].value).toEqual 'OSOM'
+      .then -> done()
+

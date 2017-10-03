@@ -99,4 +99,3 @@ describe 'Resources', ->
       .then => @test.actions.findAll()
       .then (result) -> expect(result[0].value).toEqual 'OSOM'
       .then -> done()
-

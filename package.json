@@ -11,7 +11,7 @@
     "spec": "jasmine-node spec --coffee --noStackTrace --captureExceptions",
     "cover": "istanbul cover --root lib --x '**/spec/**' -- jasmine-node --coffee spec",
     "cover:up": "codecov --file=coverage/lcov.info --disable=gcov -e TRAVIS_NODE_VERSION",
-    "test": "yarn lint && yarn cover"
+    "test": "npm run lint && npm run cover"
   },
   "devDependencies": {
     "codecov": "^1.0.1",
@@ -24,10 +24,10 @@
     "sqlite3": "^3.1.8"
   },
   "dependencies": {
-    "json-schema-faker": "0.5.0-rc8",
-    "json-schema-ref-parser": "^3.1.2",
+    "json-schema-faker": "^0.5.0-rc11",
+    "json-schema-ref-parser": "^3.3.1",
     "pg-native": "^1.10.1",
-    "sequelize": "^4.8.0",
+    "sequelize": "^4.13.15",
     "umzug": "^2.0.1"
   }
 }

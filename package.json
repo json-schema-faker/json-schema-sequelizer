@@ -21,13 +21,19 @@
     "istanbul": "^0.4.5",
     "jasmine-node": "2.0.0-beta4",
     "pg": "^6.1.5",
+    "pg-native": "^1.10.1",
     "sqlite3": "^3.1.8"
   },
   "dependencies": {
     "json-schema-faker": "^0.5.0-rc11",
     "json-schema-ref-parser": "^3.3.1",
-    "pg-native": "^1.10.1",
     "sequelize": "^4.15.2",
     "umzug": "^2.0.1"
-  }
+  },
+  "bundledDependencies": [
+    "json-schema-faker",
+    "json-schema-ref-parser",
+    "sequelize",
+    "umzug"
+  ]
 }

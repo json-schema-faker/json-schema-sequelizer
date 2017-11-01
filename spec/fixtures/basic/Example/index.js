@@ -10,5 +10,4 @@ module.exports = {
     },
     required: ['id', 'name'],
   },
-  hooks: require('./hooks.js'),
 };

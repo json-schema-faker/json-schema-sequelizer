@@ -27,7 +27,7 @@
   "dependencies": {
     "json-schema-faker": "^0.5.0-rc11",
     "json-schema-ref-parser": "^3.3.1",
-    "sequelize": "^4.15.2",
+    "sequelize": "^4.20.3",
     "umzug": "^2.0.1"
   },
   "bundledDependencies": [

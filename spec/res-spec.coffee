@@ -86,7 +86,7 @@ describe 'Resources', ->
     }
 
   it 'responds to create -> findAll/findOne', (done) ->
-    @test = JSONSchemaSequelizer.resource(@jss.refs, @jss.models.Test)
+    @test = JSONSchemaSequelizer.resource(@jss.refs, @jss.models.Test, id: 1)
 
     @jss.models.Test.options.$attributes =
       findAll: ['value']

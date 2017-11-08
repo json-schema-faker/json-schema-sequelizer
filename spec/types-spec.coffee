@@ -96,9 +96,12 @@ describe 'Types support', ->
         dialect: 'postgres'
 
       jss.add(test).connect()
-        .then -> jss.models.Test.sync({ force: true })
+        .then -> jss.models.Test.sync()
         .then -> jss.models.Test.create({ foo: 'bar' })
         .then (x) ->
           expect(x.foo).toEqual 'bar'
           jss.close()
+          done()
+        .catch (e) ->
+          console.log 'E_TYPES', e
           done()

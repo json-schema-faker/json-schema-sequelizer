@@ -97,5 +97,8 @@ describe 'Resources', ->
       .then => @test.actions.findOne()
       .then (result) -> expect(result.value).toEqual 'OSOM'
       .then => @test.actions.findAll()
-      .then (result) -> expect(result[0].value).toEqual 'OSOM'
+      .then (results) -> expect(results[0].value).toEqual 'OSOM'
       .then -> done()
+      .catch (e) ->
+        console.log 'E_RES', e
+        done()

@@ -30,6 +30,9 @@ describe 'JSONSchemaSequelizer()', ->
       @jss.scan()
         .sync()
         .then -> done()
+        .catch (e) ->
+          console.log 'E_MAIN', e
+          done()
 
     it 'supports the v4 API', ->
       x = new @jss.models.Prototype()

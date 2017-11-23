@@ -54,7 +54,7 @@ describe 'Resources', ->
 
     @jss.sync({ force: true })
       .then =>
-        @res = JSONSchemaSequelizer.resource(@jss.refs, @jss.models.Cart)
+        @res = JSONSchemaSequelizer.resource(@jss.$refs, @jss.models.Cart)
         done()
 
   it 'should keep references', ->
@@ -86,7 +86,7 @@ describe 'Resources', ->
     }
 
   it 'responds to create -> findAll/findOne', (done) ->
-    @test = JSONSchemaSequelizer.resource(@jss.refs, @jss.models.Test, id: 1)
+    @test = JSONSchemaSequelizer.resource(@jss.$refs, @jss.models.Test, id: 1)
 
     @jss.models.Test.options.$attributes =
       findAll: ['value']

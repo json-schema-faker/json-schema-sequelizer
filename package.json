@@ -14,7 +14,7 @@
     "test": "npm run lint && npm run cover"
   },
   "optionalDependencies": {
-    "graphql": "0.10.0",
+    "graphql": "^0.11.7",
     "graphql-relay": "^0.5.3",
     "graphql-sequelize": "^5.5.0",
     "graphql-tools": "^2.7.2",

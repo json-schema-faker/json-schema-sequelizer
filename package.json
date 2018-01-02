@@ -14,11 +14,11 @@
     "test": "npm run lint && npm run cover"
   },
   "optionalDependencies": {
-    "graphql": "^0.10.0",
+    "graphql": "^0.11.0",
     "graphql-relay": "^0.5.3",
     "graphql-sequelize": "^5.5.0",
     "graphql-tools": "^2.7.2",
-    "merge-graphql-schemas": "1.3.0"
+    "merge-graphql-schemas": "^1.4.0"
   },
   "devDependencies": {
     "codecov": "^3.0.0",

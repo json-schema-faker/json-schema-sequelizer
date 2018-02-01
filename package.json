@@ -13,13 +13,6 @@
     "cover:up": "codecov --file=coverage/lcov.info --disable=gcov -e TRAVIS_NODE_VERSION",
     "test": "npm run lint && npm run cover"
   },
-  "optionalDependencies": {
-    "graphql": "^0.11.0",
-    "graphql-relay": "^0.5.3",
-    "graphql-sequelize": "^5.5.0",
-    "graphql-tools": "^2.7.2",
-    "merge-graphql-schemas": "^1.4.0"
-  },
   "devDependencies": {
     "codecov": "^3.0.0",
     "eslint": "^4.10.0",

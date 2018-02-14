@@ -22,7 +22,7 @@
     "jasmine-node": "2.0.0-beta4",
     "pg": "^7.4.0",
     "pg-native": "^2.2.0",
-    "sqlite3": "^3.1.8"
+    "sqlite3": "^3.1.13"
   },
   "dependencies": {
     "fs-extra": "^4.0.2",

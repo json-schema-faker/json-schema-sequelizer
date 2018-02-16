@@ -1,0 +1,17 @@
+{
+  "properties": {
+    "id": {
+      "$ref": "dataTypes#/definitions/primaryKey"
+    },
+    "items": {
+      "$ref": "Product",
+      "belongsToMany": {
+        "through": "CartItem"
+      }
+    }
+  },
+  "required": [
+    "id",
+    "items"
+  ]
+}

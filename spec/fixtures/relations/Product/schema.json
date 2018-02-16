@@ -1,0 +1,19 @@
+{
+  "properties": {
+    "id": {
+      "$ref": "dataTypes#/definitions/primaryKey"
+    },
+    "name": {
+      "type": "string"
+    },
+    "price": {
+      "type": "number",
+      "value": "decimal"
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "price"
+  ]
+}

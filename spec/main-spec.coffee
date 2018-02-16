@@ -83,6 +83,12 @@ describe 'JSONSchemaSequelizer()', ->
     afterEach ->
       @jss.close()
 
+    it 'should create intermediate schemas with belongsToMany', ->
+      { CartId, ProductId } = @jss.models.CartItem.options.$schema.properties
+
+      expect(CartId.references).toEqual { model: 'Cart', key: 'id' }
+      expect(ProductId.references).toEqual { model: 'Product', key: 'id' }
+
     it 'should associate <prop>.items.$ref as hasMany', (done) ->
       @jss.models.Blog
         .create({

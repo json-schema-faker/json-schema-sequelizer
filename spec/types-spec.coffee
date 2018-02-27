@@ -53,17 +53,17 @@ describe 'Types support', ->
               primaryKey: true
             str:
               type: 'VARCHAR(255)'
-              allowNull: true
+              allowNull: false
               defaultValue: undefined
               primaryKey: false
             num:
               type: 'DECIMAL'
-              allowNull: true
+              allowNull: false
               defaultValue: undefined
               primaryKey: false
             bol:
               type: 'TINYINT(1)'
-              allowNull: true
+              allowNull: false
               defaultValue: undefined
               primaryKey: false
             foo:

@@ -29,7 +29,7 @@ describe 'JSONSchemaSequelizer()', ->
 
       @jss.scan()
         .sync()
-        .then -> done()
+        .then done
         .catch (e) ->
           console.log 'E_MAIN', e
           done()
@@ -50,7 +50,7 @@ describe 'JSONSchemaSequelizer()', ->
         .then (b) ->
           expect(b.get('name')).toEqual('OSOM')
           expect(b.now instanceof Date).toBe true
-        .then -> done()
+        .then done
 
   describe 'virtual types', ->
     beforeEach (done) ->
@@ -61,7 +61,7 @@ describe 'JSONSchemaSequelizer()', ->
 
       @jss.scan()
         .sync()
-        .then -> done()
+        .then done
 
     it 'it should accept virtual types', (done) ->
       @jss.models.Basic.create({ foo: 'bar', baz: 'buzz' }).then (result) ->
@@ -74,15 +74,11 @@ describe 'JSONSchemaSequelizer()', ->
       @jss = t.setup
         dialect: 'sqlite'
         storage: ':memory:'
-        logging: console.log
       , refs, dir('relations')
 
       @jss.scan()
         .sync()
-        .then -> done()
-
-    afterEach ->
-      @jss.close()
+        .then done
 
     it 'should create intermediate schemas with belongsToMany', ->
       { CartId, ProductId } = @jss.models.CartItem.options.$schema.properties
@@ -122,7 +118,9 @@ describe 'JSONSchemaSequelizer()', ->
           ]
         }, { include: [@jss.models.Person.associations.children] })
         .then (familyTree) ->
+          expect(familyTree.get('id')).toEqual 1
           expect(familyTree.get('name')).toEqual 'Gran Ma'
+          expect(familyTree.children[1].get('id')).toEqual 3
           expect(familyTree.children[1].get('name')).toEqual 'Uncle'
           done()
         .catch (e) ->

@@ -74,6 +74,7 @@ describe 'JSONSchemaSequelizer()', ->
       @jss = t.setup
         dialect: 'sqlite'
         storage: ':memory:'
+        logging: console.log
       , refs, dir('relations')
 
       @jss.scan()
@@ -86,28 +87,30 @@ describe 'JSONSchemaSequelizer()', ->
     it 'should create intermediate schemas with belongsToMany', ->
       { CartId, ProductId } = @jss.models.CartItem.options.$schema.properties
 
-      expect(CartId.references).toEqual { model: 'Cart', key: 'id' }
-      expect(ProductId.references).toEqual { model: 'Product', key: 'id' }
+      expect(CartId.references).toEqual { model: 'Carts', key: 'id' }
+      expect(ProductId.references).toEqual { model: 'Products', key: 'id' }
 
-    # it 'should associate <prop>.items.$ref as hasMany', (done) ->
-    #   @jss.models.Blog
-    #     .create({
-    #       myPosts: [
-    #         { title: 'Hello World', body: 'JSON-Schema rocks!' }
-    #       ]
-    #     }, { include: [@jss.models.Blog.associations.myPosts] })
-    #     .then (firstBlog) ->
-    #       expect(firstBlog.myPosts[0].get('title')).toEqual 'Hello World'
-    #       done()
+    it 'should associate <prop>.items.$ref as hasMany', (done) ->
+      @jss.models.Blog
+        .create({
+          name: 'Test'
+          myPosts: [
+            { title: 'Hello World', body: 'JSON-Schema rocks!' }
+          ]
+        }, { include: [@jss.models.Blog.associations.myPosts] })
+        .then (firstBlog) ->
+          expect(firstBlog.myPosts[0].get('title')).toEqual 'Hello World'
+          done()
 
-    # it 'should associate <prop>.$ref as hasOne', (done) ->
-    #   @jss.models.Blog
-    #     .create({
-    #       featuredPost: { title: 'OSOM' }
-    #     }, { include: [@jss.models.Blog.associations.featuredPost] })
-    #     .then (firstBlog) ->
-    #       expect(firstBlog.featuredPost.get('title')).toEqual 'OSOM'
-    #       done()
+    it 'should associate <prop>.$ref as hasOne', (done) ->
+      @jss.models.Blog
+        .create({
+          name: 'Test'
+          featuredPost: { title: 'OSOM', body: 'OK' }
+        }, { include: [@jss.models.Blog.associations.featuredPost] })
+        .then (firstBlog) ->
+          expect(firstBlog.featuredPost.get('title')).toEqual 'OSOM'
+          done()
 
     it 'should support other keywords too', (done) ->
       @jss.models.Person
@@ -121,4 +124,7 @@ describe 'JSONSchemaSequelizer()', ->
         .then (familyTree) ->
           expect(familyTree.get('name')).toEqual 'Gran Ma'
           expect(familyTree.children[1].get('name')).toEqual 'Uncle'
+          done()
+        .catch (e) ->
+          console.log e
           done()

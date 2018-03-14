@@ -16,6 +16,7 @@ _This is a **work in progress**, any feedback is very welcome!_
 - Associations are made from `$ref`s
 - Migrations generator/runner
 - Abstract CRUD builder
+- CLI support
 
 ## Setup
 
@@ -223,6 +224,90 @@ Initial or full migrations:
       .up();
   })
 ```
+
+### Migrating from CLI
+
+You can add your own command-line interface to run migrations, e.g.
+
+```js
+const options = {
+  // if not empty, specific migrations to run
+  migrations: [],
+  options: {
+    make: false, // if true, generate migration files
+    apply: false, // save schema changes, optional message
+    create: false, // if true, recreate database from snapshot (up)
+    destroy: false, // if true, drop all tables from snapshot (down)
+    up: false, // if true, apply all pending migrations
+    down: false, // if true, revert all applied migrations
+    next: false, // if true, apply just one pending migration
+    prev: false, // if true, revert last applied migration
+    from: null, // range for multiple migrations, use with --to
+    to: null, // range for multiple migrations, use with --from
+  },
+  // optional logger interface:
+  /* logger: {
+       error() {},
+       message() {},
+   },
+  */
+};
+
+const cli = require('json-schema-sequelizer/cli');
+
+let _error;
+let _conn;
+
+function db(cb) {
+  if (cmd === 'migrate') {
+    // builder is an instance of JSONSchemaSequelizer()
+    return cb(builder);
+  }
+}
+
+Promise.resolve()
+  .then(() => db(x => x.connect()))
+  .then(() => {
+    if (cmd === 'migrate') {
+      return db(x => cli.migrate(x, options));
+    }
+
+    process.stderr.write(`${USAGE_INFO}\n`);
+    process.exit(1);
+  })
+  .catch(e => {
+    process.stderr.write(`${e.stack}\n`);
+    _error = true;
+  })
+  .then(() => db(x => x.close()))
+  .catch(e => {
+    process.stderr.write(`${e.stack}\n`);
+    _error = true;
+  })
+  .then(() => {
+    if (_error) {
+      process.exit(1);
+    }
+  });
+```
+
+Migration options are taken from `sequelize` settings, so you can declare its details along with your database configuration, e.g.
+
+```js
+module.exports = {
+  dialect: 'sqlite',
+  storage: ':memory:',
+  directory: `${__dirname}/db`,
+  // alternative options for:
+  /* migrations: {
+       database: true || { ... },
+       directory: `${__dirname}/db`,
+     },
+  */
+};
+```
+
+Available options for customizing the `database` setup: `modelName`,  `tableName` and `columnName`.
 
 ## Resources
 

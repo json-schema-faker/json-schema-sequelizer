@@ -234,6 +234,7 @@ const options = {
   // if not empty, specific migrations to run
   migrations: [],
   options: {
+    only: [], // filter out models to operate on
     make: false, // if true, generate migration files
     apply: false, // save schema changes, optional message
     create: false, // if true, recreate database from snapshot (up)

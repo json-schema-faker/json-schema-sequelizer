@@ -23,12 +23,16 @@ module.exports = (conn, config) => {
         throw new Error(`Missing ${_baseDir} directory`);
       }
 
-      const _allowed = config.options.only
+      const _allowed = typeof config.options.only === 'string'
         ? String(config.options.only).split(',')
         : [];
 
+      if (Array.isArray(config.options.only)) {
+        Array.prototype.push.apply(_allowed, config.options.only);
+      }
+
       const _models = Object.keys(conn.models)
-        .filter(x => (_allowed.length ? _allowed.indexOf(x.name) !== -1 : true))
+        .filter(x => (_allowed.length ? _allowed.indexOf(x) !== -1 : true))
         .map(x => conn.models[x]);
 
       const _logger = config.logger || {};

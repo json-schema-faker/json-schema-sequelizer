@@ -222,7 +222,7 @@ module.exports = (conn, config) => {
       }
 
       if (config.options.apply) {
-        return upgrade().then(check);
+        return (upgrade(), check());
       }
 
       if (config.options.make) {

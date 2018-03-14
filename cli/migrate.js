@@ -16,8 +16,8 @@ module.exports = (conn, config) => {
   return Promise.resolve()
     .then(() => {
       const _cwd = process.cwd();
-      const _baseDir = conn.sequelize.options.directory;
-      const _identifier = conn.sequelize.options.identifier;
+      const _migrations = conn.sequelize.options.migrations || {};
+      const _baseDir = _migrations.directory || conn.sequelize.options.directory;
 
       if (!fs.existsSync(_baseDir)) {
         throw new Error(`Missing ${_baseDir} directory`);
@@ -168,6 +168,7 @@ module.exports = (conn, config) => {
             ? JSONSchemaSequelizer.generate({}, _models, true)
             : null,
           JSONSchemaSequelizer.migrate(conn.sequelize, {
+            database: _migrations.database,
             configFile: migrationsFile,
             baseDir: migrationsDir,
             logging(message) {

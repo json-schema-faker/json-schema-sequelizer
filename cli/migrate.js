@@ -99,7 +99,7 @@ module.exports = (conn, config) => {
           ? fs.readJsonSync(schemaJson)
           : {};
 
-        return JSONSchemaSequelizer.generate(dump || {}, _models)
+        return JSONSchemaSequelizer.generate(dump || {}, _models, false, conn.sequelize.options.define)
           .then(results => {
             /* istanbul ignore else */
             if (!results.length) {
@@ -169,7 +169,7 @@ module.exports = (conn, config) => {
 
         return Promise.all([
           config.options.apply
-            ? JSONSchemaSequelizer.generate({}, _models, true)
+            ? JSONSchemaSequelizer.generate({}, _models, true, conn.sequelize.options.define)
             : null,
           JSONSchemaSequelizer.migrate(conn.sequelize, {
             database: _migrations.database,

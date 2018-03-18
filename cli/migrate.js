@@ -124,7 +124,7 @@ module.exports = (conn, config) => {
 
               const name = typeof config.options.make === 'string'
                 ? `_${fixedName(config.options.make)}`
-                : `_${result.code.indexOf('createTable') > -1 ? 'create' : 'update'}${fixedName(result.model.tableName)}`;
+                : `_${result.code.indexOf('createTable') > -1 ? 'create' : 'update'}_${fixedName(result.model.tableName).replace(/^_/, '')}`;
 
               const file = path.join(migrationsDir, `${fulldate}${hourtime}${name}.js`);
               const src = path.relative(_cwd, file);

@@ -8,8 +8,9 @@ module.exports.setup = (options, refs, cwd) ->
     dialect: options.dialect
     storage: options.storage
     logging: options.logging or false
-    define:
+    define: options.define or {
       timestamps: false
       freezeTableName: true
+    }
 
   jss = new JSONSchemaSequelizer config, refs, cwd

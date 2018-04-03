@@ -1,0 +1,10 @@
+{
+  "properties": {
+    "str": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "str"
+  ]
+}

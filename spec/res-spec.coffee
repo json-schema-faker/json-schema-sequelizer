@@ -100,5 +100,5 @@ describe 'Resources', ->
       .then (results) -> expect(results[0].value).toEqual 'OSOM'
       .then -> done()
       .catch (e) ->
-        console.log 'E_RES', e
+        console.log 'E_RES', e.stack
         done()

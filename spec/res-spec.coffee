@@ -1,32 +1,42 @@
 JSONSchemaSequelizer = require('../lib')
 t = require('./_sequelize')
-jss = null
+
+refs = [
+  {
+    id: 'dataTypes'
+    definitions:
+      primaryKey:
+        allOf: [
+          { type: 'integer' }
+          { minimum: 1 }
+          { primaryKey: true }
+          { autoIncrement: true }
+        ]
+  }
+]
+
+jss = t.setup
+  dialect: 'sqlite'
+  storage: ':memory:'
+  #dialect: 'postgres'
+  #logging: console.log
+  define: underscored: true
+, refs, "#{__dirname}/fixtures/relations/shopping_cart"
+
+jss.scan()
 
 describe 'Resources', ->
-  refs = [
-    {
-      id: 'dataTypes'
-      definitions:
-        primaryKey:
-          allOf: [
-            { type: 'integer' }
-            { minimum: 1 }
-            { primaryKey: true }
-            { autoIncrement: true }
-          ]
-    }
-  ]
+  Cart = null
 
-  beforeEach (done) ->
-    jss = t.setup
-      dialect: 'sqlite'
-      storage: ':memory:'
-      define: underscored: true
-    , refs, "#{__dirname}/fixtures/relations"
+  fixNum = (value) ->
+    parseFloat(value).toFixed(2)
 
-    jss.scan()
-      .sync()
-      .then done
+  it 'should connect and sync before proceed', (done) ->
+    jss
+      .sync(force: true)
+      .then ->
+        Cart = JSONSchemaSequelizer.resource(jss.$refs, jss.models, 'Cart')
+        done()
       .catch (e) ->
         console.log 'E_MAIN', e.stack
         done()
@@ -35,6 +45,8 @@ describe 'Resources', ->
     data =
       items: [{
         qty: 5
+
+        # full-nested-create
         Product:
           name: 'One'
           price: 0.99
@@ -43,21 +55,76 @@ describe 'Resources', ->
         product_id: 1
       }]
 
-    resource = JSONSchemaSequelizer.resource(jss.$refs, jss.models, 'Cart')
-
     Promise.resolve()
       .then -> jss.models.Product.create({ name: 'Test', price: 1.23 })
-      .then -> resource.actions.create(data)
-      .then (row) -> row.getItems()
+      .then -> Cart.actions.create(data)
+      .then (row) -> row.getItems({ order: ['created_at'] })
       .then (data) ->
         fixedData = data.map (x) ->
-          [x.get('name'), x.get('price'), x.CartItem.get('qty')]
+          [x.get('name'), fixNum(x.get('price')), x.CartItem.get('qty')]
 
         expect(fixedData).toEqual [
-          ['Test', 1.23, 4]
-          ['One', 0.99, 5]
+          ['Test', '1.23', 4]
+          ['One', '0.99', 5]
         ]
 
+        done()
+      .catch (e) ->
+        console.log e.stack
+        done()
+
+  it 'should update data from given associations', (done) ->
+    data =
+      items: [{
+        qty: 2
+        product_id: 1
+      }]
+
+    Promise.resolve()
+      .then -> jss.models.Cart.findOne()
+      .then (row) -> Cart.actions.update(data, { id: row.get('id') })
+      .then (result) ->
+        expect(result).toEqual [1]
+        done()
+      .catch (e) ->
+        console.log e.stack
+        done()
+
+  it 'should findOne/All from given associations', (done) ->
+    jss.models.Cart.options.$attributes =
+      findOne: ['items']
+
+    Promise.resolve()
+      .then -> jss.models.Cart.findOne()
+      .then (row) -> Cart.actions.findOne({ id: row.get('id') })
+      .then (result) ->
+        fixedData =
+          items: result.get('items').map (x) ->
+            name: x.get('name')
+            price: fixNum(x.get('price'))
+            quantity: x.get('CartItem').qty
+
+        expect(fixedData).toEqual {
+          items: [
+            { name: 'One', price: '0.99', quantity: 5 }
+            { name: 'Test', price: '1.23', quantity: 2 }
+          ]
+        }
+
+        done()
+      .catch (e) ->
+        console.log e.stack
+        done()
+
+  it 'should destroy data from given associtations', (done) ->
+    Promise.resolve()
+      .then -> Cart.actions.destroy()
+      .then -> Promise.all([
+        jss.models.CartItem.count()
+        jss.models.Cart.count()
+      ])
+      .then (result) ->
+        expect(result).toEqual [0, 0]
         done()
       .catch (e) ->
         console.log e.stack

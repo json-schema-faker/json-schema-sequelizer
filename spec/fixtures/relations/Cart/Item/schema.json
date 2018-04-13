@@ -1,0 +1,11 @@
+{
+  "properties": {
+    "id": {
+      "type": "integer",
+      "primaryKey": true
+    },
+    "qty": {
+      "type": "integer"
+    }
+  }
+}

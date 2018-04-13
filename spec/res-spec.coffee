@@ -1,104 +1,64 @@
 JSONSchemaSequelizer = require('../lib')
 t = require('./_sequelize')
+jss = null
 
 describe 'Resources', ->
+  refs = [
+    {
+      id: 'dataTypes'
+      definitions:
+        primaryKey:
+          allOf: [
+            { type: 'integer' }
+            { minimum: 1 }
+            { primaryKey: true }
+            { autoIncrement: true }
+          ]
+    }
+  ]
+
   beforeEach (done) ->
-    @jss = t.setup
+    jss = t.setup
       dialect: 'sqlite'
       storage: ':memory:'
+      define: underscored: true
+    , refs, "#{__dirname}/fixtures/relations"
 
-    @jss.add
-      $schema:
-        id: 'Test'
-        properties:
-          id:
-            type: 'integer'
-            primaryKey: true
-          value:
-            type: 'string'
-
-    @jss.add
-      $schema:
-        id: 'Owner'
-        type: 'object'
-        properties:
-          id:
-            type: 'integer'
-            primaryKey: true
-          name: type: 'string'
-
-    @jss.add
-      $schema:
-        id: 'Cart'
-        properties:
-          id:
-            type: 'integer'
-            primaryKey: true
-          owner:
-            $ref: 'Owner'
-            belongsTo: true
-          cart:
-            type: 'array'
-            items:
-              hasMany: true
-              $ref: 'virtualTestQty'
-
-    @jss.add
-      $schema:
-        id: 'virtualTestQty'
-        virtual: true
-        properties:
-          test: $ref: 'Test'
-          qty: type: 'number'
-
-
-    @jss.sync({ force: true })
-      .then =>
-        @res = JSONSchemaSequelizer.resource(@jss.$refs, @jss.models.Cart)
+    jss.scan()
+      .sync()
+      .then done
+      .catch (e) ->
+        console.log 'E_MAIN', e.stack
         done()
 
-  it 'should keep references', ->
-    expect(@res.options.refs.owner.rel).toEqual 'belongsTo'
-    expect(@res.options.refs.owner.model).toEqual 'Owner'
-    expect(@res.options.refs.owner.plural).toEqual 'Owners'
-    expect(@res.options.refs.owner.singular).toEqual 'Owner'
-    expect(@res.options.refs.owner.references).toEqual {
-      primaryKey: { prop: 'id', type: 'integer' }
-      foreignKey: { prop: 'ownerId', type: 'integer' }
-    }
+  it 'should create data from given associations', (done) ->
+    data =
+      items: [{
+        qty: 5
+        Product:
+          name: 'One'
+          price: 0.99
+      }, {
+        qty: 4
+        product_id: 1
+      }]
 
-    expect(@res.options.refs.test.rel).toEqual 'hasOne'
-    expect(@res.options.refs.test.model).toEqual 'Test'
-    expect(@res.options.refs.test.plural).toEqual 'Tests'
-    expect(@res.options.refs.test.singular).toEqual 'Test'
-    expect(@res.options.refs.test.references).toEqual {
-      primaryKey: { prop: 'id', type: 'integer' }
-      foreignKey: null
-    }
-
-    expect(@res.options.refs.cart.rel).toEqual 'hasMany'
-    expect(@res.options.refs.cart.model).toEqual 'virtualTestQty'
-    expect(@res.options.refs.cart.plural).toEqual 'virtualTestQties'
-    expect(@res.options.refs.cart.singular).toEqual 'virtualTestQty'
-    expect(@res.options.refs.cart.references).toEqual {
-      primaryKey: null,
-      foreignKey: null
-    }
-
-  it 'responds to create -> findAll/findOne', (done) ->
-    @test = JSONSchemaSequelizer.resource(@jss.$refs, @jss.models.Test, id: 1)
-
-    @jss.models.Test.options.$attributes =
-      findAll: ['value']
+    resource = JSONSchemaSequelizer.resource(jss.$refs, jss.models, 'Cart')
 
     Promise.resolve()
-      .then => @test.actions.create(value: 'OSOM')
-      .then (result) -> expect(result.value).toEqual 'OSOM'
-      .then => @test.actions.findOne()
-      .then (result) -> expect(result.value).toEqual 'OSOM'
-      .then => @test.actions.findAll()
-      .then (results) -> expect(results[0].value).toEqual 'OSOM'
-      .then -> done()
+      .then -> jss.models.Product.create({ name: 'Test', price: 1.23 })
+      .then -> resource.actions.create(data)
+      .then (row) -> row.getItems()
+      .then (data) ->
+        fixedData = data.map (x) ->
+          [x.get('name'), x.get('price'), x.CartItem.get('qty')]
+
+        expect(fixedData).toEqual [
+          ['Test', 1.23, 4]
+          ['One', 0.99, 5]
+        ]
+
+        done()
       .catch (e) ->
-        console.log 'E_RES', e.stack
+        console.log e.stack
         done()

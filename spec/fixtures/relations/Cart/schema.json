@@ -6,7 +6,10 @@
     "items": {
       "$ref": "Product",
       "belongsToMany": {
-        "through": "CartItem"
+        "through": {
+          "model": "CartItem",
+          "unique": false
+        }
       }
     }
   },

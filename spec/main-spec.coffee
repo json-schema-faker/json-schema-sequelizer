@@ -76,17 +76,11 @@ describe 'JSONSchemaSequelizer()', ->
       jss = t.setup
         dialect: 'sqlite'
         storage: ':memory:'
-      , refs, dir('relations')
+      , refs, dir('relations/blog_site')
 
       jss.scan()
         .sync()
         .then done
-
-    it 'should create intermediate schemas with belongsToMany', ->
-      { CartId, ProductId } = jss.models.CartItem.options.$schema.properties
-
-      expect(CartId.references).toEqual { model: 'Cart', key: 'id' }
-      expect(ProductId.references).toEqual { model: 'Product', key: 'id' }
 
     it 'should associate <prop>.items.$ref as hasMany', (done) ->
       jss.models.Blog

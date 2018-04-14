@@ -15,126 +15,126 @@ refs = [
   }
 ]
 
-jss = t.setup
-  dialect: 'sqlite'
-  storage: ':memory:'
-  #dialect: 'postgres'
-  #logging: console.log
-  define: underscored: true
-, refs, "#{__dirname}/fixtures/relations/shopping_cart"
+settings = [
+  { dialect: 'sqlite', storage: ':memory:', define: underscored: true }
+  { dialect: 'postgres', define: underscored: true }
+]
 
-jss.scan()
+settings.forEach (config) ->
+  jss = null
+  jss = t.setup config, refs, "#{__dirname}/fixtures/relations/shopping_cart"
+  jss.scan()
 
-describe 'Resources', ->
-  Cart = null
+  describe "Resources (#{config.dialect})", ->
+    Cart = null
 
-  it 'should connect and sync before proceed', (done) ->
-    jss
-      .sync(force: true)
-      .then ->
-        Cart = JSONSchemaSequelizer.resource(jss.$refs, jss.models, 'Cart')
-        done()
-      .catch (e) ->
-        console.log 'E_MAIN', e.stack
-        done()
+    it 'should connect and sync before proceed', (done) ->
+      jss
+        .sync(force: true)
+        .then ->
+          Cart = JSONSchemaSequelizer.resource(jss.$refs, jss.models, 'Cart')
+          done()
+        .catch (e) ->
+          console.log 'E_MAIN', e.stack
+          done()
 
-  it 'should create data from given associations', (done) ->
-    data =
-      items: [{
-        qty: 5
+    it 'should create data from given associations', (done) ->
+      data =
+        items: [{
+          qty: 5
 
-        # full-nested-create
-        Product:
-          name: 'One'
-          price: 0.99
-      }, {
-        qty: 4
-        product_id: 1
-      }]
+          # full-nested-create
+          Product:
+            name: 'One'
+            price: 0.99
+        }, {
+          qty: 4
+          product_id: 1
+        }]
 
-    Promise.resolve()
-      .then -> jss.models.Product.create({ name: 'Test', price: 1.23 })
-      .then -> Cart.actions.create(data)
-      .then (row) -> row.getItems({ order: ['created_at'] })
-      .then (data) ->
-        fixedData = data.map (x) ->
-          [x.get('name'), parseFloat(x.get('price')), x.CartItem.get('qty')]
+      Promise.resolve()
+        .then -> jss.models.Product.create({ name: 'Test', price: 1.23 })
+        .then -> Cart.actions.create(data)
+        .then (row) -> row.getItems({ order: ['created_at'] })
+        .then (data) ->
+          fixedData = data.map (x) ->
+            [x.get('name'), parseFloat(x.get('price')), x.CartItem.get('qty')]
 
-        expect(fixedData).toEqual [
-          ['Test', 1.23, 4]
-          ['One', 0.99, 5]
+          expect(fixedData).toEqual [
+            ['Test', 1.23, 4]
+            ['One', 0.99, 5]
+          ]
+
+          done()
+        .catch (e) ->
+          console.log e.stack
+          done()
+
+    it 'should update data from given associations', (done) ->
+      data =
+        items: [{
+          qty: 2
+          product_id: 1
+        }]
+
+      Promise.resolve()
+        .then -> jss.models.Cart.findOne()
+        .then (row) -> Cart.actions.update(data, where: id: row.get('id'))
+        .then (result) ->
+          expect(result).toEqual [1]
+          done()
+        .catch (e) ->
+          console.log e.stack
+          done()
+
+    it 'should findOne/All from given associations', (done) ->
+      jss.models.Cart.options.$attributes =
+        findOne: [
+          'items.name'
+          'items.price'
         ]
 
-        done()
-      .catch (e) ->
-        console.log e.stack
-        done()
-
-  it 'should update data from given associations', (done) ->
-    data =
-      items: [{
-        qty: 2
-        product_id: 1
-      }]
-
-    Promise.resolve()
-      .then -> jss.models.Cart.findOne()
-      .then (row) -> Cart.actions.update(data, where: id: row.get('id'))
-      .then (result) ->
-        expect(result).toEqual [1]
-        done()
-      .catch (e) ->
-        console.log e.stack
-        done()
-
-  it 'should findOne/All from given associations', (done) ->
-    jss.models.Cart.options.$attributes =
-      findOne: [
-        'items.name'
-        'items.price'
-      ]
-
-    Promise.resolve()
-      .then -> jss.models.Cart.findOne()
-      .then (row) ->
-        options =
-          where:
-            id: row.get('id')
+      Promise.resolve()
+        .then -> jss.models.Cart.findOne()
+        .then (row) ->
+          options =
+            where:
+              id: row.get('id')
+              items:
+                qty: [2, 5]
             items:
-              qty: [2, 5]
-          items:
-            order: ['created_at', 'DESC']
+              order: ['created_at', 'DESC']
 
-        Cart.actions.findOne(options)
-      .then (result) ->
-        fixedData =
-          items: result.get('items').map (x) ->
-            name: x.get('name')
-            price: parseFloat(x.get('price'))
-            quantity: x.get('CartItem').qty
+          Cart.actions.findOne(options)
+        .then (result) ->
+          fixedData =
+            items: result.get('items').map (x) ->
+              name: x.get('name')
+              price: parseFloat(x.get('price'))
+              quantity: x.get('CartItem').qty
 
-        expect(fixedData).toEqual {
-          items: [
-            { name: 'One', price: 0.99, quantity: 5 }
-            { name: 'Test', price: 1.23, quantity: 2 }
-          ]
-        }
+          expect(fixedData).toEqual {
+            items: [
+              { name: 'One', price: 0.99, quantity: 5 }
+              { name: 'Test', price: 1.23, quantity: 2 }
+            ]
+          }
 
-        done()
-      .catch (e) ->
-        console.log e.stack
-        done()
+          done()
+        .catch (e) ->
+          console.log e.stack
+          done()
 
-  it 'should destroy data from given associtations', (done) ->
-    Promise.resolve()
-      .then -> Cart.actions.destroy()
-      .then -> Promise.all([
-        jss.models.CartItem.count()
-        jss.models.Cart.count()
-      ])
-      .then (result) ->
-        expect(result).toEqual [0, 0]
-        done()
-      .catch (e) ->
-        console.log e.stack
-        done()
+    it 'should destroy data from given associtations', (done) ->
+      Promise.resolve()
+        .then -> Cart.actions.destroy()
+        .then -> Promise.all([
+          jss.models.CartItem.count()
+          jss.models.Cart.count()
+        ])
+        .then (result) ->
+          expect(result).toEqual [0, 0]
+          done()
+        .catch (e) ->
+          console.log e.stack
+          done()

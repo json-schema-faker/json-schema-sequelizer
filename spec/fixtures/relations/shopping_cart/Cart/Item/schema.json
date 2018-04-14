@@ -1,10 +1,5 @@
 {
   "properties": {
-    "id": {
-      "type": "integer",
-      "primaryKey": true,
-      "autoIncrement": true
-    },
     "qty": {
       "type": "integer"
     }

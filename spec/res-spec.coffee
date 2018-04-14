@@ -82,7 +82,7 @@ describe 'Resources', ->
 
     Promise.resolve()
       .then -> jss.models.Cart.findOne()
-      .then (row) -> Cart.actions.update(data, { id: row.get('id') })
+      .then (row) -> Cart.actions.update(data, where: id: row.get('id'))
       .then (result) ->
         expect(result).toEqual [1]
         done()
@@ -92,11 +92,23 @@ describe 'Resources', ->
 
   it 'should findOne/All from given associations', (done) ->
     jss.models.Cart.options.$attributes =
-      findOne: ['items']
+      findOne: [
+        'items.name'
+        'items.price'
+      ]
 
     Promise.resolve()
       .then -> jss.models.Cart.findOne()
-      .then (row) -> Cart.actions.findOne({ id: row.get('id') })
+      .then (row) ->
+        options =
+          where:
+            id: row.get('id')
+            items:
+              qty: [2, 5]
+          items:
+            order: ['created_at', 'DESC']
+
+        Cart.actions.findOne(options)
       .then (result) ->
         fixedData =
           items: result.get('items').map (x) ->

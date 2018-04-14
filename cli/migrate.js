@@ -85,7 +85,7 @@ module.exports = (conn, config) => {
           })
           .then(() => JSONSchemaSequelizer.migrate(conn.sequelize, require(schemaFile), true)[config.options.create ? 'up' : 'down']())
           .then(() => {
-            _logger.message(`${config.options.use} ${config.options.create ? 'applied' : 'reverted'}`);
+            _logger.message(`${config.options.create ? 'applied' : 'reverted'} ${path.relative(_cwd, schemaFile)}`);
           });
       }
 

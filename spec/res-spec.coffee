@@ -28,9 +28,6 @@ jss.scan()
 describe 'Resources', ->
   Cart = null
 
-  fixNum = (value) ->
-    parseFloat(value).toFixed(2)
-
   it 'should connect and sync before proceed', (done) ->
     jss
       .sync(force: true)
@@ -61,11 +58,11 @@ describe 'Resources', ->
       .then (row) -> row.getItems({ order: ['created_at'] })
       .then (data) ->
         fixedData = data.map (x) ->
-          [x.get('name'), fixNum(x.get('price')), x.CartItem.get('qty')]
+          [x.get('name'), parseFloat(x.get('price')), x.CartItem.get('qty')]
 
         expect(fixedData).toEqual [
-          ['Test', '1.23', 4]
-          ['One', '0.99', 5]
+          ['Test', 1.23, 4]
+          ['One', 0.99, 5]
         ]
 
         done()
@@ -113,13 +110,13 @@ describe 'Resources', ->
         fixedData =
           items: result.get('items').map (x) ->
             name: x.get('name')
-            price: fixNum(x.get('price'))
+            price: parseFloat(x.get('price'))
             quantity: x.get('CartItem').qty
 
         expect(fixedData).toEqual {
           items: [
-            { name: 'One', price: '0.99', quantity: 5 }
-            { name: 'Test', price: '1.23', quantity: 2 }
+            { name: 'One', price: 0.99, quantity: 5 }
+            { name: 'Test', price: 1.23, quantity: 2 }
           ]
         }
 

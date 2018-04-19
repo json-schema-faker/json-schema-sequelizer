@@ -75,10 +75,6 @@ settings.forEach (config) ->
         items: [{
           qty: 2
           product_id: 1
-        }, {
-          Product:
-            id: 2
-            name: 'OSOM'
         }]
 
       Promise.resolve()
@@ -119,7 +115,7 @@ settings.forEach (config) ->
 
           expect(fixedData).toEqual {
             items: [
-              { name: 'OSOM', price: 0.99, quantity: 5 }
+              { name: 'One', price: 0.99, quantity: 5 }
               { name: 'Test', price: 1.23, quantity: 2 }
             ]
           }

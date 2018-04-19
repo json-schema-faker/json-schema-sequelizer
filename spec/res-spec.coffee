@@ -75,6 +75,10 @@ settings.forEach (config) ->
         items: [{
           qty: 2
           product_id: 1
+        }, {
+          Product:
+            id: 2
+            name: 'OSOM'
         }]
 
       Promise.resolve()
@@ -115,7 +119,7 @@ settings.forEach (config) ->
 
           expect(fixedData).toEqual {
             items: [
-              { name: 'One', price: 0.99, quantity: 5 }
+              { name: 'OSOM', price: 0.99, quantity: 5 }
               { name: 'Test', price: 1.23, quantity: 2 }
             ]
           }
@@ -138,3 +142,33 @@ settings.forEach (config) ->
         .catch (e) ->
           console.log e.stack
           done()
+
+
+# FIXME: if the given item has a ref-PK, then it'll update its associated row, add otherwise
+# FIXME: prove all this out with functional tests...
+# UPDATE|CREATE -> {
+#   id?: 1,
+#   items: [
+#     {
+#       qty: 3,
+#       created_at: '2018-04-19T07:02:52.286Z',
+#       updated_at: '2018-04-19T07:04:48.614Z',
+#       cart_id!: 1,
+#       product_id?: 1,
+#       Product: {
+#         id?: 1,
+#         name: 'Example',
+#         price: '234'
+#       }
+#     },
+#     {
+#       qty: 99,
+#       product_id: 2,
+#       Product: {
+#         id: 2,
+#         name: 'Another',
+#         price: '345'
+#       }
+#     }
+#   ]
+# }

@@ -175,3 +175,5 @@ settings.forEach (config) ->
           console.log e
           done()
 
+    it 'should close on finish', ->
+      jss.close()

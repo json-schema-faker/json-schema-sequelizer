@@ -33,6 +33,13 @@ settings.forEach (config) ->
         .sync(force: true)
         .then ->
           Cart = JSONSchemaSequelizer.resource(jss.$refs, jss.models, 'Cart')
+
+          jss.models.Cart.options.$attributes =
+            findOne: [
+              'items.name'
+              'items.price'
+            ]
+
           done()
         .catch (e) ->
           console.log 'E_MAIN', e.stack
@@ -78,40 +85,32 @@ settings.forEach (config) ->
         }]
 
       Promise.resolve()
-        .then -> jss.models.Cart.findOne()
-        .then (row) -> Cart.actions.update(data, where: id: row.get('id'))
+        .then -> Cart.actions.update(data, where: id: 1)
         .then (result) ->
-          expect(result).toEqual [1]
+          expect(result.id).toEqual 1
           done()
         .catch (e) ->
           console.log e.stack
           done()
 
     it 'should findOne/All from given associations', (done) ->
-      jss.models.Cart.options.$attributes =
-        findOne: [
-          'items.name'
-          'items.price'
-        ]
+      options =
+        where:
+          id: 1
+          items:
+            qty: [2, 5]
+        items:
+          required: true
+          order: ['created_at', 'DESC']
 
       Promise.resolve()
-        .then -> jss.models.Cart.findOne()
-        .then (row) ->
-          options =
-            where:
-              id: row.get('id')
-              items:
-                qty: [2, 5]
-            items:
-              order: ['created_at', 'DESC']
-
-          Cart.actions.findOne(options)
+        .then -> Cart.actions.findOne(options)
         .then (result) ->
           fixedData =
-            items: result.get('items').map (x) ->
-              name: x.get('name')
-              price: parseFloat(x.get('price'))
-              quantity: x.get('CartItem').qty
+            items: result.items.map (x) ->
+              name: x.Product.name
+              price: parseFloat(x.Product.price)
+              quantity: x.qty
 
           expect(fixedData).toEqual {
             items: [
@@ -130,41 +129,49 @@ settings.forEach (config) ->
         .then -> Cart.actions.destroy()
         .then -> Promise.all([
           jss.models.CartItem.count()
+          jss.models.Product.count()
           jss.models.Cart.count()
         ])
         .then (result) ->
-          expect(result).toEqual [0, 0]
+          expect(result).toEqual [0, 2, 0]
           done()
         .catch (e) ->
           console.log e.stack
           done()
 
+    it 'should work under complex conditions', (done) ->
+      newOrder =
+        items: [
+          { qty: 1, product_id: 1 }
+        ]
 
-# FIXME: if the given item has a ref-PK, then it'll update its associated row, add otherwise
-# FIXME: prove all this out with functional tests...
-# UPDATE|CREATE -> {
-#   id?: 1,
-#   items: [
-#     {
-#       qty: 3,
-#       created_at: '2018-04-19T07:02:52.286Z',
-#       updated_at: '2018-04-19T07:04:48.614Z',
-#       cart_id!: 1,
-#       product_id?: 1,
-#       Product: {
-#         id?: 1,
-#         name: 'Example',
-#         price: '234'
-#       }
-#     },
-#     {
-#       qty: 99,
-#       product_id: 2,
-#       Product: {
-#         id: 2,
-#         name: 'Another',
-#         price: '345'
-#       }
-#     }
-#   ]
-# }
+      Product = { name: 'Test', price: 1.23 }
+
+      updateOrder = (cartId) ->
+        id: cartId
+        items: [
+          { qty: 0, cart_id: cartId, product_id: 1 }
+          { qty: 1, product_id: 1 }
+          { qty: 2, cart_id: cartId, product_id: 1, Product }
+          { qty: 3, product_id: 1, Product }
+          { qty: 4, Product: { name: 'Extra', price: 10 } }
+        ]
+
+      Promise.resolve()
+        .then -> Cart.actions.create(newOrder)
+        .then -> Cart.actions.findOne()
+        .then (result) ->
+          expect(result.items.length).toEqual 1
+          Cart.actions.update(updateOrder(result.id), where: id: result.id)
+        .then ->
+          Promise.all [
+            jss.models.CartItem.count()
+            jss.models.Product.count()
+          ]
+        .then (result) ->
+          expect(result).toEqual [4, 3]
+          done()
+        .catch (e) ->
+          console.log e
+          done()
+

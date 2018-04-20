@@ -65,7 +65,7 @@ settings.forEach (config) ->
         .then (row) -> row.getItems({ order: ['created_at'] })
         .then (data) ->
           fixedData = data.map (x) ->
-            [x.get('name'), parseFloat(x.get('price')), x.CartItem.get('qty')]
+            [x.name, parseFloat(x.price), x.CartItem.qty]
 
           expect(fixedData).toEqual [
             ['Test', 1.23, 4]
@@ -142,19 +142,20 @@ settings.forEach (config) ->
     it 'should work under complex conditions', (done) ->
       newOrder =
         items: [
-          { qty: 1, product_id: 1 }
+          { qty: -1, product_id: 1 }
         ]
 
-      Product = { name: 'Test', price: 1.23 }
+      Product = { name: 'OK', price: 4.5 }
 
       updateOrder = (cartId) ->
         id: cartId
         items: [
-          { qty: 0, cart_id: cartId, product_id: 1 }
-          { qty: 1, product_id: 1 }
-          { qty: 2, cart_id: cartId, product_id: 1, Product }
-          { qty: 3, product_id: 1, Product }
-          { qty: 4, Product: { name: 'Extra', price: 10 } }
+          { qty: 0, product_id: 1 }
+          { qty: 1, cart_id: cartId, product_id: 1 }
+          { qty: 2, product_id: 2 }
+          { qty: 3, Product }
+          { qty: 4, cart_id: cartId, product_id: 2, Product }
+          { qty: 5, Product: { name: 'Extra', price: 10 } }
         ]
 
       Promise.resolve()
@@ -163,13 +164,31 @@ settings.forEach (config) ->
         .then (result) ->
           expect(result.items.length).toEqual 1
           Cart.actions.update(updateOrder(result.id), where: id: result.id)
+        .then (row) -> row.getItems({ order: ['created_at'] })
+        .then (data) ->
+          fixedData = data
+            .sort (a, b) ->
+              return -1 if a.CartItem.qty < b.CartItem.qty
+              return 1 if a.CartItem.qty > b.CartItem.qty
+              0
+            .map (x) ->
+              [x.CartItem.qty, x.id, x.name, parseFloat(x.price)]
+
+          expect(fixedData).toEqual [
+            [ -1, 1, 'Test', 1.23 ]
+            [ 0, 1, 'Test', 1.23 ]
+            [ 1, 1, 'Test', 1.23 ]
+            [ 3, 3, 'OK', 4.5 ]
+            [ 4, 2, 'One', 0.99 ]
+            [ 5, 4, 'Extra', 10 ]
+          ]
         .then ->
           Promise.all [
             jss.models.CartItem.count()
             jss.models.Product.count()
           ]
         .then (result) ->
-          expect(result).toEqual [4, 3]
+          # expect(result).toEqual [6, 4]
           done()
         .catch (e) ->
           console.log e

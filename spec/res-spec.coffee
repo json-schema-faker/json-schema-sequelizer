@@ -30,7 +30,7 @@ settings.forEach (config) ->
 
     it 'should connect and sync before proceed', (done) ->
       jss
-        .sync(force: true)
+        .sync({ force: true, logging: false })
         .then ->
           Cart = JSONSchemaSequelizer.resource(jss.$refs, jss.models, 'Cart')
 

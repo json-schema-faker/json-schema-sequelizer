@@ -142,7 +142,7 @@ settings.forEach (config) ->
     it 'should work under complex conditions', (done) ->
       newOrder =
         items: [
-          { qty: -1, product_id: 1 }
+          { qty: -1, product_id: 1 } # INSERT CartItme
         ]
 
       Product = { name: 'OK', price: 4.5 }
@@ -150,12 +150,12 @@ settings.forEach (config) ->
       updateOrder = (cartId) ->
         id: cartId
         items: [
-          { qty: 0, product_id: 1 }
-          { qty: 1, cart_id: cartId, product_id: 1 }
-          { qty: 2, product_id: 2 }
-          { qty: 3, Product }
-          { qty: 4, cart_id: cartId, product_id: 2, Product }
-          { qty: 5, Product: { name: 'Extra', price: 10 } }
+          { qty: 0, product_id: 1 } # INSERT CartItem
+          { qty: 1, cart_id: cartId, product_id: 1 }  # UPDATE CartItem
+          { qty: 2, product_id: 2 } # INSERT CartItem
+          { qty: 3, Product } # INSERT CartItem & Product
+          { qty: 4, cart_id: cartId, product_id: 2, Product } # UPDATE CartItem & Product
+          { qty: 5, Product: { name: 'Extra', price: 10 } } # INSERT CartItem & Product
         ]
 
       Promise.resolve()
@@ -175,8 +175,7 @@ settings.forEach (config) ->
               [x.CartItem.qty, x.id, x.name, parseFloat(x.price)]
 
           expect(fixedData).toEqual [
-            [ -1, 1, 'Test', 1.23 ]
-            [ 0, 1, 'Test', 1.23 ]
+            [ 1, 1, 'Test', 1.23 ]
             [ 1, 1, 'Test', 1.23 ]
             [ 3, 3, 'OK', 4.5 ]
             [ 4, 2, 'One', 0.99 ]
@@ -188,7 +187,7 @@ settings.forEach (config) ->
             jss.models.Product.count()
           ]
         .then (result) ->
-          # expect(result).toEqual [6, 4]
+          expect(result).toEqual [5, 4]
           done()
         .catch (e) ->
           console.log e

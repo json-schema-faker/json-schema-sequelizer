@@ -6,6 +6,8 @@ $refs =
   TEST:
     tableName: 'OTHER'
 
+jss = null
+
 describe 'diff-builder', ->
   describe 'generated code', ->
     beforeEach ->
@@ -143,21 +145,21 @@ describe 'diff-builder', ->
 
   describe 'supported options', ->
     beforeEach (done) ->
-      @jss = t.setup
+      jss = t.setup
         dialect: 'sqlite'
         storage: ':memory:'
         define:
           timestamps: true
           underscored: true
 
-      @jss.add
+      jss.add
         $schema:
           id: 'Example'
           properties: id:
             type: 'integer'
             primaryKey: true
 
-      @jss.add
+      jss.add
         $schema:
           id: 'ExampleTwo'
           properties: id:
@@ -166,7 +168,7 @@ describe 'diff-builder', ->
           options:
             freezeTableName: true
 
-      @jss.add
+      jss.add
         $schema:
           id: 'ExampleThree'
           properties:
@@ -181,59 +183,59 @@ describe 'diff-builder', ->
                 $ref: 'ExampleTwo'
                 belongsToMany: through: 'AnyModel'
 
-      @jss.connect()
-        .then => @jss.sync()
+      jss.connect()
+        .then -> jss.sync()
         .then -> done()
         .catch (e) ->
           console.log 'E_DIFF', e.stack
           done()
 
     it 'supports timestamps + underscored', ->
-      expect(@jss.models.Example.options.timestamps).toBe true
-      expect(@jss.models.Example.options.underscored).toBe true
-      expect(@jss.models.Example.options.freezeTableName).toBe false
+      expect(jss.models.Example.options.timestamps).toBe true
+      expect(jss.models.Example.options.underscored).toBe true
+      expect(jss.models.Example.options.freezeTableName).toBe false
 
-      Example = @jss.models.Example.options.$schema
+      Example = jss.models.Example.options.$schema
       exampleProps = ['id', 'created_at', 'updated_at']
-      exampleMigration = diff.build('Example', @jss.models, {}, Example, diff.map({}, Example))
+      exampleMigration = diff.build('Example', jss.models, {}, Example, diff.map({}, Example))
 
-      expect(Object.keys(@jss.models.Example.attributes)).toEqual exampleProps
+      expect(Object.keys(jss.models.Example.attributes)).toEqual exampleProps
       expect(exampleMigration).toContain "createTable('Examples'"
       expect(exampleMigration).toContain "dropTable('Examples'"
       expect(exampleMigration).toContain "created_at:"
       expect(exampleMigration).toContain "updated_at:"
 
     it 'supports freezeTableName + underscored', ->
-      expect(@jss.models.ExampleTwo.options.timestamps).toBe true
-      expect(@jss.models.ExampleTwo.options.underscored).toBe true
-      expect(@jss.models.ExampleTwo.options.freezeTableName).toBe true
+      expect(jss.models.ExampleTwo.options.timestamps).toBe true
+      expect(jss.models.ExampleTwo.options.underscored).toBe true
+      expect(jss.models.ExampleTwo.options.freezeTableName).toBe true
 
-      Example2 = @jss.models.ExampleTwo.options.$schema
+      Example2 = jss.models.ExampleTwo.options.$schema
       example2Props = ['id', 'created_at', 'updated_at']
-      example2Migration = diff.build('ExampleTwo', @jss.models, {}, Example2, diff.map({}, Example2))
+      example2Migration = diff.build('ExampleTwo', jss.models, {}, Example2, diff.map({}, Example2))
 
-      expect(Object.keys(@jss.models.ExampleTwo.attributes)).toEqual example2Props
+      expect(Object.keys(jss.models.ExampleTwo.attributes)).toEqual example2Props
       expect(example2Migration).toContain "createTable('example_two'"
       expect(example2Migration).toContain "dropTable('example_two'"
 
     it 'support for foreign keys + references', (done) ->
-      expect(@jss.models.ExampleThree.attributes.just_one_id.references).toEqual { model: 'Examples', key: 'id' }
-      expect(@jss.models.ExampleThree.attributes.just_one_id.onDelete).toEqual 'SET NULL'
-      expect(@jss.models.ExampleThree.attributes.just_one_id.onUpdate).toEqual 'CASCADE'
+      expect(jss.models.ExampleThree.attributes.just_one_id.references).toEqual { model: 'Examples', key: 'id' }
+      expect(jss.models.ExampleThree.attributes.just_one_id.onDelete).toEqual 'SET NULL'
+      expect(jss.models.ExampleThree.attributes.just_one_id.onUpdate).toEqual 'CASCADE'
 
-      expect(@jss.models.AnyModel.attributes.example_two_id.references).toEqual { model: 'example_two', key: 'id' }
-      expect(@jss.models.AnyModel.attributes.example_two_id.onDelete).toEqual 'CASCADE'
-      expect(@jss.models.AnyModel.attributes.example_two_id.onUpdate).toEqual 'CASCADE'
+      expect(jss.models.AnyModel.attributes.example_two_id.references).toEqual { model: 'example_two', key: 'id' }
+      expect(jss.models.AnyModel.attributes.example_two_id.onDelete).toEqual 'CASCADE'
+      expect(jss.models.AnyModel.attributes.example_two_id.onUpdate).toEqual 'CASCADE'
 
-      expect(@jss.models.AnyModel.attributes.example_three_id.references).toEqual { model: 'ExampleThrees', key: 'id' }
-      expect(@jss.models.AnyModel.attributes.example_three_id.onDelete).toEqual 'CASCADE'
-      expect(@jss.models.AnyModel.attributes.example_three_id.onUpdate).toEqual 'CASCADE'
+      expect(jss.models.AnyModel.attributes.example_three_id.references).toEqual { model: 'ExampleThrees', key: 'id' }
+      expect(jss.models.AnyModel.attributes.example_three_id.onDelete).toEqual 'CASCADE'
+      expect(jss.models.AnyModel.attributes.example_three_id.onUpdate).toEqual 'CASCADE'
 
-      Example3 = util.fixRefs(@jss.models.ExampleThree.options.$schema, true)
-      example3Migration = diff.build('ExampleThree', @jss.models, {}, Example3, diff.map({}, Example3))
+      Example3 = util.fixRefs(jss.models.ExampleThree.options.$schema, true)
+      example3Migration = diff.build('ExampleThree', jss.models, {}, Example3, diff.map({}, Example3))
 
-      AnyModel = util.fixRefs(@jss.models.AnyModel.options.$schema, true)
-      anyModelMigration = diff.build('AnyModel', @jss.models, {}, AnyModel, diff.map({}, AnyModel))
+      AnyModel = util.fixRefs(jss.models.AnyModel.options.$schema, true)
+      anyModelMigration = diff.build('AnyModel', jss.models, {}, AnyModel, diff.map({}, AnyModel))
 
       integerType = (PK) ->
         type: 'INTEGER'
@@ -283,11 +285,11 @@ describe 'diff-builder', ->
       '''
 
       Promise.resolve()
-        .then =>
-            @jss.models.ExampleThree.describe().then (result) ->
+        .then ->
+            jss.models.ExampleThree.describe().then (result) ->
               expect(result.just_one_id).toEqual integerType()
-        .then =>
-            @jss.models.AnyModel.describe().then (result) ->
+        .then ->
+            jss.models.AnyModel.describe().then (result) ->
               expect(result.example_two_id).toEqual integerType(true)
               expect(result.example_three_id).toEqual integerType(true)
         .catch (e) ->

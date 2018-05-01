@@ -45,6 +45,9 @@ settings.forEach (config) ->
           console.log 'E_MAIN', e.stack
           done()
 
+    it 'should skip primaryKeys when unique is false', ->
+      expect(Object.keys(jss.models.CartItem.primaryKeys)).toEqual ['id']
+
     it 'should create data from given associations', (done) ->
       data =
         items: [{

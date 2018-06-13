@@ -191,6 +191,9 @@ settings.forEach (config) ->
           ]
         .then (result) ->
           expect(result).toEqual [5, 4]
+        .then -> Cart.actions.findOne()
+        .then (result) ->
+          expect(result.items.length).toEqual 5
           done()
         .catch (e) ->
           console.log e

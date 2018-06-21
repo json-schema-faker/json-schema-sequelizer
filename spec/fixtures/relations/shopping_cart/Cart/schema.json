@@ -4,11 +4,14 @@
       "$ref": "dataTypes#/definitions/primaryKey"
     },
     "items": {
-      "$ref": "Product",
-      "belongsToMany": {
-        "through": {
-          "model": "CartItem",
-          "unique": false
+      "type": "array",
+      "items": {
+        "$ref": "Product",
+        "belongsToMany": {
+          "through": {
+            "model": "CartItem",
+            "unique": false
+          }
         }
       }
     }

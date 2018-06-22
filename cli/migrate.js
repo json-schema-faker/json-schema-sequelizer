@@ -108,7 +108,7 @@ module.exports = (conn, config) => {
               return;
             }
 
-            results.forEach(result => {
+            results.forEach((result, key) => {
               /* istanbul ignore else */
               if (!result.code) {
                 return;
@@ -126,7 +126,7 @@ module.exports = (conn, config) => {
                 ? `_${fixedName(config.options.make)}`
                 : `_${result.code.indexOf('createTable') > -1 ? 'create' : 'update'}_${fixedName(result.model.tableName).replace(/^_/, '')}`;
 
-              const file = path.join(migrationsDir, `${fulldate}${hourtime}${name}.js`);
+              const file = path.join(migrationsDir, `${fulldate}${hourtime}.${key}${name}.js`);
               const src = path.relative(_cwd, file);
 
               _logger.message(`write ${src}`);

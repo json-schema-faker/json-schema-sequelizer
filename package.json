@@ -1,6 +1,6 @@
 {
   "name": "json-schema-sequelizer",
-  "version": "0.15.2",
+  "version": "0.15.3",
   "main": "lib/index.js",
   "author": "Alvaro Cabrera <pateketrueke@gmail.com>",
   "description": "Sequelize models with JSON-Schema powers!",

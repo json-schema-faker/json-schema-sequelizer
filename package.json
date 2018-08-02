@@ -20,6 +20,7 @@
     "eslint-plugin-import": "^2.8.0",
     "istanbul": "^0.4.5",
     "jasmine-node": "2.0.0-beta4",
+    "json-schema-ref-parser": "^5.1.2",
     "pg": "^7.4.0",
     "pg-native": "^2.2.0",
     "sqlite3": "^4.0.0"
@@ -27,7 +28,6 @@
   "dependencies": {
     "fs-extra": "^5.0.0",
     "glob": "^7.1.2",
-    "json-schema-ref-parser": "^5.0.0",
     "sequelize": "^4.22.5",
     "umzug": "^2.0.1"
   }

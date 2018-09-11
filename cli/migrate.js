@@ -20,6 +20,7 @@ module.exports = (conn, config) => {
       const _migrations = conn.sequelize.options.migrations || {};
       const _baseDir = _migrations.directory || conn.sequelize.options.directory;
 
+      /* istanbul ignore else */
       if (!fs.existsSync(_baseDir)) {
         throw new Error(`Missing ${_baseDir} directory`);
       }
@@ -28,6 +29,7 @@ module.exports = (conn, config) => {
         ? String(config.options.only).split(',')
         : [];
 
+      /* istanbul ignore else */
       if (Array.isArray(config.options.only)) {
         Array.prototype.push.apply(_allowed, config.options.only);
       }
@@ -223,14 +225,17 @@ module.exports = (conn, config) => {
           });
       }
 
+      /* istanbul ignore else */
       if (config.options.create || config.options.destroy) {
         return reset();
       }
 
+      /* istanbul ignore else */
       if (config.options.apply) {
         return (upgrade(), check());
       }
 
+      /* istanbul ignore else */
       if (config.options.make) {
         return write();
       }

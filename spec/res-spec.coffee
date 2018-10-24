@@ -32,7 +32,7 @@ settings.forEach (config) ->
       jss
         .sync({ force: true, logging: false })
         .then ->
-          Cart = JSONSchemaSequelizer.resource(jss.$refs, jss.models, 'Cart')
+          Cart = JSONSchemaSequelizer.resource(jss, 'Cart')
 
           jss.models.Cart.options.$attributes =
             findOne: [

@@ -6,12 +6,19 @@
   "description": "Sequelize models with JSON-Schema powers!",
   "license": "MIT",
   "scripts": {
-    "dev": "jasmine-node spec --coffee --verbose --autoTest --watchFolders lib",
-    "lint": "eslint lib spec",
-    "spec": "jasmine-node spec --coffee --noStackTrace --captureExceptions",
-    "cover": "istanbul cover --root lib --x '**/spec/**' -- jasmine-node --coffee spec",
-    "cover:up": "codecov --file=coverage/lcov.info --disable=gcov -e TRAVIS_NODE_VERSION",
-    "test": "npm run lint && npm run cover"
+    "dev": "npm test -- -w",
+    "lint": "eslint lib tests",
+    "test": "npm run test:unit --",
+    "test:ci": "npm run coverage:all && npm run report -- -r lcov",
+    "test:all": "npm run test:run tests && npm run report -- -r html",
+    "test:run": "NODE_ENV=test _mocha --exit --recursive -bR spec",
+    "test:unit": "npm run test:run tests --",
+    "coverage": "nyc -x '**/tests/**' -x '**/*.test.js'",
+    "coverage:all": "npm run coverage -- npm run test:all",
+    "coverage:unit": "npm run coverage -- npm run test:unit",
+    "codecov": "codecov --file=coverage/lcov.info -e TRAVIS_NODE_VERSION",
+    "report": "nyc report",
+    "pretest": "npm run lint"
   },
   "devDependencies": {
     "chai": "^4.2.0",

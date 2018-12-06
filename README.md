@@ -1,6 +1,8 @@
 # JSON-Schema Sequelizer
 
-[![travis-ci](https://api.travis-ci.org/pateketrueke/json-schema-sequelizer.svg)](https://travis-ci.org/pateketrueke/json-schema-sequelizer) [![codecov](https://codecov.io/gh/pateketrueke/json-schema-sequelizer/branch/master/graph/badge.svg)](https://codecov.io/gh/pateketrueke/json-schema-sequelizer)
+[![NPM version](https://badge.fury.io/js/json-schema-sequelizer.png)](http://badge.fury.io/js/json-schema-sequelizer)
+[![travis-ci](https://api.travis-ci.org/pateketrueke/json-schema-sequelizer.svg)](https://travis-ci.org/pateketrueke/json-schema-sequelizer)
+[![codecov](https://codecov.io/gh/pateketrueke/json-schema-sequelizer/branch/master/graph/badge.svg)](https://codecov.io/gh/pateketrueke/json-schema-sequelizer)
 
 Declare your Sequelize models using JSON-Schema today!
 

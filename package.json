@@ -27,7 +27,7 @@
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.8.0",
     "json-schema-ref-parser": "^6.0.2",
-    "mocha": "^5.2.0",
+    "mocha": "^6.0.2",
     "nyc": "^13.1.0",
     "pg": "^7.4.0",
     "pg-native": "^3.0.0",

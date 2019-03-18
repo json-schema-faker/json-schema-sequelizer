@@ -128,7 +128,7 @@ settings.forEach(config => {
         where: {
           id: 1,
           items: {
-            qty: [2, 5],
+            qty: [4, 5],
           },
         },
         items: {
@@ -159,7 +159,7 @@ settings.forEach(config => {
             }, {
               name: 'Test',
               price: 1.23,
-              quantity: 2,
+              quantity: 4,
             },
           ],
         });
@@ -197,8 +197,8 @@ settings.forEach(config => {
       return Promise.resolve()
         .then(() => Cart.actions.update({
           items: [
-            { id: 5, qty: 1, Product: { id: 1 } },
-            { id: 6, qty: 1, Product: { id: 2 } },
+            { id: 4, qty: 1, Product: { id: 1 } },
+            { id: 5, qty: 1, Product: { id: 2 } },
           ],
         }, { where: { id: 2 } }))
         .then(c => Cart.actions.findOne(c).then(x => {

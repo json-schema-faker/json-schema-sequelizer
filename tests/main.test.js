@@ -2,6 +2,7 @@
 
 const { expect } = require('chai');
 const path = require('path');
+const JSONSchemaSequelizer = require('../lib');
 const t = require('./_sequelize');
 
 function dir(subdir) {
@@ -130,6 +131,18 @@ describe('JSONSchemaSequelizer()', () => {
         include: [jss.models.Blog.associations.featuredPost],
       }).then(firstBlog => {
         expect(firstBlog.featuredPost.get('title')).to.eql('OSOM');
+
+        return jss.models.Blog.findOne({
+          where: { id: firstBlog.id },
+          include: [jss.models.Blog.associations.featuredPost],
+        }).then(b => expect(b.featuredPost.get()).to.eql({
+          id: 2,
+          body: 'OK',
+          title: 'OSOM',
+          published: false,
+          BlogId: null,
+          featuredPostId: 2,
+        }));
       });
     });
 
@@ -151,6 +164,38 @@ describe('JSONSchemaSequelizer()', () => {
         expect(familyTree.children[1].get('id')).to.eql(3);
         expect(familyTree.children[1].get('name')).to.eql('Uncle');
       });
+    });
+
+    it('should work with resources', () => {
+      const Blog = JSONSchemaSequelizer.resource(jss, 'Blog');
+
+      jss.models.Blog.options.$attributes = {
+        findAll: ['name', 'myPosts.title', 'featuredPost.title'],
+      };
+
+      return Promise.resolve()
+        .then(() => Blog.actions.create({
+          name: 'Osom blog!',
+          myPosts: [
+            {
+              title: 'This thing works',
+              body: 'And still rocks',
+            },
+          ],
+          featuredPost: {
+            title: 'OK',
+            body: 'OK',
+          },
+        }))
+        .then(b => Blog.actions.findOne({ where: { id: b.id } }))
+        .then(result => expect(result).to.eql({
+          id: 3,
+          name: 'Osom blog!',
+          myPosts: [
+            { BlogId: 3, id: 3, title: 'This thing works' },
+          ],
+          featuredPost: { featuredPostId: 3, id: 4, title: 'OK' },
+        }));
     });
   });
 });

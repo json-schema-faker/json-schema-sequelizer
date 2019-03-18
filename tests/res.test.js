@@ -166,7 +166,7 @@ settings.forEach(config => {
       });
     });
 
-    it('should destroy data from given associtations', () => {
+    it('should destroy data from given associations', () => {
       return Promise.resolve().then(() => {
         return Cart.actions.destroy();
       }).then(() => {
@@ -176,99 +176,53 @@ settings.forEach(config => {
       });
     });
 
-    it('should work under complex conditions', () => {
-      const newOrder = {
-        items: [
-          {
-            qty: -1,
-            product_id: 1,
-          },
-        ],
-      };
-
-      const Product = {
-        name: 'OK',
-        price: 4.5,
-      };
-
-      const updateOrder = cartId => {
-        return {
-          id: cartId,
+    it('should create data from nested associations ', () => {
+      return Promise.resolve()
+        .then(() => Cart.actions.create({
           items: [
-            {
-              qty: 0,
-              product_id: 1,
-            }, {
-              qty: 1,
-              cart_id: cartId,
-              product_id: 1,
-            }, {
-              qty: 2,
-              product_id: 2,
-            }, {
-              qty: 3,
-              Product,
-            }, {
-              qty: 4,
-              cart_id: cartId,
-              product_id: 2,
-              Product,
-            }, {
-              qty: 5,
-              Product: {
-                name: 'Extra',
-                price: 10,
-              },
-            },
+            { qty: 2, Product: { name: 'Example', price: 0.20 } },
+            { qty: 2, Product: { id: 2, name: 'One', price: 0.99 } },
+            { qty: 2, Product: { id: 1, name: 'Test', price: 1.23 } },
           ],
-        };
+        }))
+        .then(c => Cart.actions.findOne(c).then(x => {
+          expect(x.items.reduce((a, b) => a + (b.Product.price * b.qty), 0)).to.eql(4.84);
+        }))
+        .then(() => Cart.actions.count().then(x => expect(x).to.eql(1)))
+        .then(() => jss.models.Product.count().then(x => expect(x).to.eql(3)))
+        .then(() => jss.models.CartItem.count().then(x => expect(x).to.eql(3)));
+    });
+
+    it('should update data from nested associations ', () => {
+      return Promise.resolve()
+        .then(() => Cart.actions.update({
+          items: [
+            { id: 5, qty: 1, Product: { id: 1 } },
+            { id: 6, qty: 1, Product: { id: 2 } },
+          ],
+        }, { where: { id: 2 } }))
+        .then(c => Cart.actions.findOne(c).then(x => {
+          expect(x.items.reduce((a, b) => a + (b.Product.price * b.qty), 0)).to.eql(2.62);
+        }));
+    });
+
+    it('should update data from single associations', () => {
+      const Product = JSONSchemaSequelizer.resource(jss, 'Product');
+
+      jss.models.Product.options.$attributes = {
+        findAll: ['name', 'price'],
       };
 
-      return Promise.resolve().then(() => {
-        return Cart.actions.create(newOrder);
-      }).then(() => {
-        return Cart.actions.findOne();
-      }).then(result => {
-        expect(result.items.length).to.eql(1);
-        return Cart.actions.update(updateOrder(result.id), {
-          where: {
-            id: result.id,
-          },
-        });
-      })
-        .then(row => {
-          return row.getItems({
-            order: ['created_at'],
-          });
-        })
-        .then(data => {
-          const fixedData = data.sort((a, b) => {
-            if (a.CartItem.qty < b.CartItem.qty) {
-              return -1;
-            }
+      return Promise.resolve()
+        .then(() => Product.actions.update({ name: 'Two' }, { where: { name: 'One' } }))
+        .then(() => Product.actions.findAll({ order: [['name', 'ASC']] })).then(x => {
+          const value = x.map(y => `${y.name} $${y.price}`).join('\n');
 
-            if (a.CartItem.qty > b.CartItem.qty) {
-              return 1;
-            }
-
-            return 0;
-          }).map(x => {
-            return [x.CartItem.qty, x.id, x.name, parseFloat(x.price)];
-          });
-
-          expect(fixedData).to.eql([[1, 1, 'Test', 1.23], [1, 1, 'Test', 1.23], [3, 3, 'OK', 4.5], [4, 2, 'One', 0.99], [5, 4, 'Extra', 10]]);
-        })
-        .then(() => {
-          return Promise.all([jss.models.CartItem.count(), jss.models.Product.count()]);
-        })
-        .then(result => {
-          expect(result).to.eql([5, 4]);
-        })
-        .then(() => {
-          return Cart.actions.findOne();
-        })
-        .then(result => {
-          expect(result.items.length).to.eql(5);
+          expect([
+            'Example $0.2',
+            'Test $1.23',
+            'Two $0.99',
+          ].join('\n')).to.eql(value);
         });
     });
 

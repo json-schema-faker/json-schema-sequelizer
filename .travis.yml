@@ -4,6 +4,8 @@ services:
   - postgresql
 addons:
   postgresql: '9.5'
+  sonarcloud:
+    organization: "pateketrueke-github"
 language: node_js
 node_js:
   - 6
@@ -14,6 +16,7 @@ before_script:
   - psql -c 'create database travis_ci_test;' -U postgres
   - npm install sqlite3
 script:
+  - 'sonar-scanner'
   - 'npm run test:ci'
 after_success:
   - 'npm run codecov'

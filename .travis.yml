@@ -6,7 +6,7 @@ addons:
   postgresql: '9.5'
   sonarcloud:
     organization: "pateketrueke-github"
-    project: "pateketrueke_json-schema-sequelizer"
+    projectKey: "pateketrueke_json-schema-sequelizer"
 language: node_js
 node_js:
   - 6

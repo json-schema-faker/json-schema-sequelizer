@@ -76,7 +76,7 @@ settings.forEach(config => {
             },
           }, {
             qty: 4,
-            product_id: 1,
+            ProductId: 1,
           },
         ],
       };
@@ -87,10 +87,11 @@ settings.forEach(config => {
           price: 1.23,
         });
       }).then(() => {
-        return Cart.actions.create(data);
+        return Cart.actions.create(data)
+          .then(pk => jss.models.Cart.findByPk(pk));
       }).then(row => {
         return row.getItems({
-          order: ['created_at'],
+          order: ['createdAt'],
         });
       })
         .then(result => {
@@ -107,7 +108,7 @@ settings.forEach(config => {
         items: [
           {
             qty: 2,
-            product_id: 1,
+            ProductId: 1,
           },
         ],
       };
@@ -118,8 +119,8 @@ settings.forEach(config => {
             id: 1,
           },
         });
-      }).then(result => {
-        expect(result.id).to.eql(1);
+      }).then(pk => {
+        expect(pk).to.eql(1);
       });
     });
 
@@ -128,12 +129,12 @@ settings.forEach(config => {
         where: {
           id: 1,
           items: {
-            qty: [4, 5],
+            qty: [2, 5],
           },
         },
         items: {
           required: true,
-          order: ['created_at', 'DESC'],
+          order: ['createdAt', 'DESC'],
         },
       };
 
@@ -159,7 +160,7 @@ settings.forEach(config => {
             }, {
               name: 'Test',
               price: 1.23,
-              quantity: 4,
+              quantity: 2,
             },
           ],
         });
@@ -168,7 +169,7 @@ settings.forEach(config => {
 
     it('should destroy data from given associations', () => {
       return Promise.resolve().then(() => {
-        return Cart.actions.destroy();
+        return Cart.actions.destroy({ where: { id: 1 } });
       }).then(() => {
         return Promise.all([jss.models.CartItem.count(), jss.models.Product.count(), jss.models.Cart.count()]);
       }).then(result => {
@@ -185,8 +186,8 @@ settings.forEach(config => {
             { qty: 2, Product: { id: 1, name: 'Test', price: 1.23 } },
           ],
         }))
-        .then(c => Cart.actions.findOne(c).then(x => {
-          expect(x.items.reduce((a, b) => a + (b.Product.price * b.qty), 0)).to.eql(4.84);
+        .then(pk => Cart.actions.findOne({ where: { id: pk } }).then(x => {
+          expect((x.items.reduce((a, b) => a + (b.Product.price * b.qty), 0)).toFixed(2)).to.eql('4.84');
         }))
         .then(() => Cart.actions.count().then(x => expect(x).to.eql(1)))
         .then(() => jss.models.Product.count().then(x => expect(x).to.eql(3)))
@@ -201,8 +202,8 @@ settings.forEach(config => {
             { id: 5, qty: 1, Product: { id: 2 } },
           ],
         }, { where: { id: 2 } }))
-        .then(c => Cart.actions.findOne(c).then(x => {
-          expect(x.items.reduce((a, b) => a + (b.Product.price * b.qty), 0)).to.eql(2.62);
+        .then(pk => Cart.actions.findOne({ where: { id: pk } }).then(x => {
+          expect((x.items.reduce((a, b) => a + (b.Product.price * b.qty), 0)).toFixed(2)).to.eql('2.62');
         }));
     });
 

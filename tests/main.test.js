@@ -187,7 +187,7 @@ describe('JSONSchemaSequelizer()', () => {
             body: 'OK',
           },
         }))
-        .then(b => Blog.actions.findOne({ where: { id: b.id } }))
+        .then(pk => Blog.actions.findOne({ where: { id: pk } }))
         .then(result => expect(result).to.eql({
           id: 3,
           name: 'Osom blog!',

@@ -236,12 +236,12 @@ describe('diff-builder', () => {
       expect(jss.models.Example.options.freezeTableName).to.eql(false);
 
       const Example = jss.models.Example.options.$schema;
-      const exampleProps = ['id', 'created_at', 'updated_at'];
+      const exampleProps = ['id', 'createdAt', 'updatedAt'];
       const exampleMigration = diff.build('Example', jss.models, {}, Example, diff.map({}, Example));
 
-      expect(Object.keys(jss.models.Example.attributes)).to.eql(exampleProps);
-      expect(exampleMigration).to.contain("createTable('Examples'");
-      expect(exampleMigration).to.contain("dropTable('Examples'");
+      expect(Object.keys(jss.models.Example.rawAttributes)).to.eql(exampleProps);
+      expect(exampleMigration).to.contain("createTable('examples'");
+      expect(exampleMigration).to.contain("dropTable('examples'");
       expect(exampleMigration).to.contain('created_at:');
       expect(exampleMigration).to.contain('updated_at:');
     });
@@ -252,33 +252,33 @@ describe('diff-builder', () => {
       expect(jss.models.ExampleTwo.options.freezeTableName).to.eql(true);
 
       const Example2 = jss.models.ExampleTwo.options.$schema;
-      const example2Props = ['id', 'created_at', 'updated_at'];
+      const example2Props = ['id', 'createdAt', 'updatedAt'];
       const example2Migration = diff.build('ExampleTwo', jss.models, {}, Example2, diff.map({}, Example2));
 
-      expect(Object.keys(jss.models.ExampleTwo.attributes)).to.eql(example2Props);
+      expect(Object.keys(jss.models.ExampleTwo.rawAttributes)).to.eql(example2Props);
       expect(example2Migration).to.contain("createTable('example_two'");
       expect(example2Migration).to.contain("dropTable('example_two'");
     });
 
     it('support for foreign keys + references', () => {
-      expect(jss.models.ExampleThree.attributes.just_one_id.references).to.eql({
-        model: 'Examples',
+      expect(jss.models.ExampleThree.rawAttributes.justOneId.references).to.eql({
+        model: 'examples',
         key: 'id',
       });
-      expect(jss.models.ExampleThree.attributes.just_one_id.onDelete).to.eql('SET NULL');
-      expect(jss.models.ExampleThree.attributes.just_one_id.onUpdate).to.eql('CASCADE');
-      expect(jss.models.AnyModel.attributes.example_two_id.references).to.eql({
+      expect(jss.models.ExampleThree.rawAttributes.justOneId.onDelete).to.eql('SET NULL');
+      expect(jss.models.ExampleThree.rawAttributes.justOneId.onUpdate).to.eql('CASCADE');
+      expect(jss.models.AnyModel.rawAttributes.ExampleTwoId.references).to.eql({
         model: 'example_two',
         key: 'id',
       });
-      expect(jss.models.AnyModel.attributes.example_two_id.onDelete).to.eql('CASCADE');
-      expect(jss.models.AnyModel.attributes.example_two_id.onUpdate).to.eql('CASCADE');
-      expect(jss.models.AnyModel.attributes.example_three_id.references).to.eql({
-        model: 'ExampleThrees',
+      expect(jss.models.AnyModel.rawAttributes.ExampleTwoId.onDelete).to.eql('CASCADE');
+      expect(jss.models.AnyModel.rawAttributes.ExampleTwoId.onUpdate).to.eql('CASCADE');
+      expect(jss.models.AnyModel.rawAttributes.ExampleThreeId.references).to.eql({
+        model: 'example_threes',
         key: 'id',
       });
-      expect(jss.models.AnyModel.attributes.example_three_id.onDelete).to.eql('CASCADE');
-      expect(jss.models.AnyModel.attributes.example_three_id.onUpdate).to.eql('CASCADE');
+      expect(jss.models.AnyModel.rawAttributes.ExampleThreeId.onDelete).to.eql('CASCADE');
+      expect(jss.models.AnyModel.rawAttributes.ExampleThreeId.onUpdate).to.eql('CASCADE');
 
       const Example3 = util.fixRefs(jss.models.ExampleThree.options.$schema, true);
       const example3Migration = diff.build('ExampleThree', jss.models, {}, Example3, diff.map({}, Example3));
@@ -294,13 +294,13 @@ describe('diff-builder', () => {
         };
       };
 
-      expect(example3Migration).to.contain("createTable('ExampleThrees'");
-      expect(example3Migration).to.contain("dropTable('ExampleThrees'");
+      expect(example3Migration).to.contain("createTable('example_threes'");
+      expect(example3Migration).to.contain("dropTable('example_threes'");
 
       /* eslint-disable */
-      expect(example3Migration).to.contain('// manyOfThem <ExampleTwo>\n        just_one_id: {\n          type: dataTypes.INTEGER,\n          references: {\n            model: \'Examples\',\n            key: \'id\',\n          },\n          onDelete: \'SET NULL\',\n          onUpdate: \'CASCADE\',\n        },');
-      expect(anyModelMigration).to.contain('example_three_id: {\n          type: dataTypes.INTEGER,\n          references: {\n            model: \'ExampleThrees\',\n            key: \'id\',\n          },\n          primaryKey: true,\n          onDelete: \'CASCADE\',\n          onUpdate: \'CASCADE\',\n        },');
-      expect(anyModelMigration).to.contain('example_two_id: {\n          type: dataTypes.INTEGER,\n          references: {\n            model: \'example_two\',\n            key: \'id\',\n          },\n          primaryKey: true,\n          onDelete: \'CASCADE\',\n          onUpdate: \'CASCADE\',\n        },');
+      expect(example3Migration).to.contain('// manyOfThem <ExampleTwo>\n        justOneId: {\n          type: dataTypes.INTEGER,\n          references: {\n            model: \'examples\',\n            key: \'id\',\n          },\n          onDelete: \'SET NULL\',\n          onUpdate: \'CASCADE\',\n        },');
+      expect(anyModelMigration).to.contain('example_three_id: {\n          type: dataTypes.INTEGER,\n          modelName: \'ExampleThree\',\n          references: {\n            model: \'ExampleThrees\',\n            key: \'id\',\n          },\n          primaryKey: true,\n          onDelete: \'CASCADE\',\n          onUpdate: \'CASCADE\',\n        },');
+      expect(anyModelMigration).to.contain('example_two_id: {\n          type: dataTypes.INTEGER,\n          modelName: \'ExampleTwo\',\n          references: {\n            model: \'example_two\',\n            key: \'id\',\n          },\n          primaryKey: true,\n          onDelete: \'CASCADE\',\n          onUpdate: \'CASCADE\',\n        },');
       /* eslint-enable */
 
       return Promise.resolve().then(() => {

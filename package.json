@@ -36,7 +36,7 @@
   "dependencies": {
     "fs-extra": "^7.0.1",
     "glob": "^7.1.2",
-    "sequelize": "^4.22.5",
+    "sequelize": "^5.1.1",
     "umzug": "^2.0.1"
   }
 }

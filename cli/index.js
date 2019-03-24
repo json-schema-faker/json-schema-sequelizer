@@ -1,7 +1,3 @@
-const argv = require('wargs')(process.argv.slice(2));
-
-const cmd = argv._.shift();
-
 const USAGE_INFO = `
 Perform database changes
 
@@ -35,20 +31,18 @@ Examples:
   {bin} backup --save path/to/seeds --only Product,Cart
 `;
 
-const defaults = {
-  migrations: argv._.slice(),
-  options: argv.flags,
-};
-
 function getHelp(binary) {
   return USAGE_INFO.replace(/{bin}/g, binary || process.argv.slice(1)[0]);
 }
 
-function runHook(moduleName) {
-  return conn => require(`./${moduleName}`)(conn, defaults);
+function runHook(argv, conn) {
+  return require(`./${argv._.shift()}`)(conn, {
+    migrations: argv._.slice(),
+    options: argv.flags,
+  });
 }
 
 module.exports = {
   usage: getHelp,
-  execute: runHook(cmd),
+  execute: runHook,
 };

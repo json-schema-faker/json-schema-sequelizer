@@ -36,16 +36,11 @@ function getHelp(binary) {
 }
 
 function runHook(db, cmd, argv) {
-  let all;
-  let opts;
+  argv = argv || require('wargs')(process.argv.slice(2));
+  cmd = cmd || (argv._ && argv._[0]);
 
-  if (!cmd) {
-    argv = argv || require('wargs')(process.argv.slice(2));
-
-    all = argv._.slice(1);
-    cmd = argv._[0];
-    opts = argv.flags;
-  }
+  const all = argv._ && argv._.slice(1);
+  const opts = argv && argv.flags;
 
   return require(`./${cmd}`)(db, {
     migrations: all || [],

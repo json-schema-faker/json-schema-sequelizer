@@ -35,10 +35,22 @@ function getHelp(binary) {
   return USAGE_INFO.replace(/{bin}/g, binary || process.argv.slice(1)[0]);
 }
 
-function runHook(argv, conn) {
-  return require(`./${argv._.shift()}`)(conn, {
-    migrations: argv._.slice(),
-    options: argv.flags,
+function runHook(conn, task, opts) {
+  let all;
+
+  opts = opts || {};
+
+  if (!task) {
+    const argv = require('wargs')(process.argv.slice(2));
+
+    all = argv._.slice(1);
+    task = argv._[0];
+    opts = argv.flags;
+  }
+
+  return require(`./${task}`)(conn, {
+    migrations: all || opts.migrations || [],
+    options: opts,
   });
 }
 

@@ -35,22 +35,21 @@ function getHelp(binary) {
   return USAGE_INFO.replace(/{bin}/g, binary || process.argv.slice(1)[0]);
 }
 
-function runHook(conn, task, opts) {
+function runHook(db, cmd, argv) {
   let all;
+  let opts;
 
-  opts = opts || {};
-
-  if (!task) {
-    const argv = require('wargs')(process.argv.slice(2));
+  if (!cmd) {
+    argv = argv || require('wargs')(process.argv.slice(2));
 
     all = argv._.slice(1);
-    task = argv._[0];
+    cmd = argv._[0];
     opts = argv.flags;
   }
 
-  return require(`./${task}`)(conn, {
-    migrations: all || opts.migrations || [],
-    options: opts,
+  return require(`./${cmd}`)(db, {
+    migrations: all || [],
+    options: opts || {},
   });
 }
 

@@ -85,7 +85,16 @@ module.exports = (conn, config) => {
           .then(() => {
             _logger.message(`read ${path.relative(_cwd, schemaFile)}`);
           })
-          .then(() => JSONSchemaSequelizer.migrate(conn.sequelize, require(schemaFile), true)[config.options.create ? 'up' : 'down']())
+          .then(() => {
+            const instance = JSONSchemaSequelizer.migrate(conn.sequelize, require(schemaFile), true);
+            const method = config.options.create ? 'up' : 'down';
+
+            if (!instance[method]) {
+              throw new Error(`Missing ${method}() method!`);
+            }
+
+            return instance[method]();
+          })
           .then(() => {
             _logger.message(`${config.options.create ? 'applied' : 'reverted'} ${path.relative(_cwd, schemaFile)}`);
           });

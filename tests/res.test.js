@@ -215,8 +215,9 @@ settings.forEach(config => {
       };
 
       return Promise.resolve()
-        .then(() => Product.actions.update({ name: 'Two' }, { where: { name: 'One' } }))
-        .then(() => Product.actions.findAll({ order: [['name', 'ASC']] })).then(x => {
+        .then(() => Product.actions.update({ name: 'Two' }, { where: { id: 2 } }))
+        .then(() => Product.actions.findAll({ order: [['name', 'ASC']] }))
+        .then(x => {
           const value = x.map(y => `${y.name} $${y.price}`).join('\n');
 
           expect([

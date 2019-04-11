@@ -27,7 +27,7 @@
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.8.0",
     "json-schema-ref-parser": "^6.0.2",
-    "mocha": "^6.0.2",
+    "mocha": "^6.1.2",
     "nyc": "^13.3.0",
     "pg": "^7.4.0",
     "pg-native": "^3.0.0",
@@ -36,7 +36,7 @@
   "dependencies": {
     "fs-extra": "^7.0.1",
     "glob": "^7.1.2",
-    "sequelize": "^5.1.1",
+    "sequelize": "^5.3.1",
     "umzug": "^2.0.1",
     "wargs": "^0.8.2"
   }

@@ -55,6 +55,9 @@ const builder = new JSONSchemaSequelizer(settings, definitions, process.cwd());
 Models are just Javascript objects:
 
 ```js
+// for validations below
+const assert = require('assert');
+
 // add a Tag model
 builder.add({
   // the $schema object is required at top-level
@@ -98,7 +101,7 @@ builder.add({
     // ensure all read-operations retrieve Tag's name
     // for individual actions try setting up `findOne`
     findAll: [
-      'name'
+      'name',
     ],
   },
   // any other property will be used as the model definition
@@ -127,14 +130,14 @@ builder.connect()
       ],
     }, {
       // associations are set explicitly
-      include: [builder.models.Tag.associations.children]
+      include: [builder.models.Tag.associations.children],
     });
   })
   .then(tag => {
-    console.log(tag.id); // 1
-    console.log(tag.name); // Root
-    console.log(tag.children[0].id); // 2
-    console.log(tag.children[0].name); // Leaf
+    assert(tag.id === 1);
+    assert(tag.name === 'Root');
+    assert(tag.children[0].id === 2);
+    assert(tag.children[0].name === 'Leaf');
   })
 ```
 
@@ -159,18 +162,17 @@ Bundle all your definitions:
 ```js
   .then(() => {
     // built-in schemas from given models, e.g.
-    const set = Object.keys(builder.models).map(m => builder.refs[m].$schema);
+    const set = Object.keys(builder.models).map(m => builder.$refs[m].$schema);
 
     // dump current schema
     const bundle = JSONSchemaSequelizer.bundle(set, definitions, 'Latest changes!');
 
     // save all schemas as single JSON-Schema
     require('fs').writeFileSync('current_schema.json', JSON.stringify(bundle, null, 2));
-
-    // migrating from snapshots is easy
-    return builder.rehydrate(bundle);
   })
 ```
+
+> The generated file is a full JSON-Schema representation of your models, quite useful isn't?
 
 ### Generating code
 
@@ -180,25 +182,25 @@ Exporting and loading changes:
   .then(() => {
     // if true, all up/down/change calls will be merged
     const squashMigrations = true;
+    const bindMigration = true;
 
     // any diff from here will generate its migration code
     const previousBundle = {};
 
     // dump migration code
-    return JSONSchemaSequelizer.generate(previousBundle, builder.models, squashMigrations)
+    const fixedModels = Object.values(builder.models);
+
+    return JSONSchemaSequelizer.generate(previousBundle, fixedModels, squashMigrations)
       .then(result => {
         // save as module
         require('fs').writeFileSync('current_schema.js', result.code);
 
-        // when saving migrations to disk, you can load them later
-        // by instantiating a custom `umzug` wrapper
-        const wrapper = JSONSchemaSequelizer.migrate(settings, {
-          configFile: 'db/migrations.json',
-          baseDir: 'db/migrations',
-          logger(message) {
-            console.log(message);
-          },
-        });
+        // after saving to disk, you can load the schema later by instantiating a custom `umzug` wrapper
+        const fixedSchema = require('./current_schema.js');
+
+        // since it's a single migration-file you MUST pass `true` as last argument to bind it
+        const wrapper = JSONSchemaSequelizer
+          .migrate(builder.sequelize, fixedSchema, bindMigration);
 
         return wrapper.up().then(() => {
           console.log('Done!');
@@ -213,69 +215,62 @@ Initial or full migrations:
 
 ```js
   .then(() => {
-    // if true, will bind the given arguments for run as migrations,
-    // otherwise it will instantiate a `umzg` wrapper (see above)
-    const bindMethods = true;
-
     // this can be a module, or json-object
-    const options = require('./current_schema');
+    const options = {
+      configFile: 'db/migrations.json',
+      baseDir: 'db/migrations',
+      logging(message) {
+        console.log(message);
+      },
+    };
+
+    // `params` are used to properly invoke umzug
+    const params = {
+      migrations: [],
+      only: [], // filter out models to operate on
+      make: false, // if true, generate migration files
+      apply: false, // save schema changes, optional message
+      create: false, // if true, recreate database from snapshot (up)
+      destroy: false, // if true, drop all tables from snapshot (down)
+      up: false, // if true, apply all pending migrations
+      down: false, // if true, revert all applied migrations
+      next: false, // if true, apply just one pending migration
+      prev: false, // if true, revert last applied migration
+      from: null, // range for multiple migrations, use with --to
+      to: null, // range for multiple migrations, use with --from
+    };
 
     // execute migration from code
     return JSONSchemaSequelizer
-      .migrate(builder.sequelize, options, bindMethods)
-      .up();
+      .migrate(builder.sequelize, options)
+      .up(params);
   })
 ```
 
 ### Migrating from CLI
 
-You can add your own command-line interface to run migrations, e.g.
+You can add your own command-line interface to list and run migrations, e.g.
 
 ```js
-const options = {
-  // if not empty, specific migrations to run
-  migrations: [],
-  options: {
-    only: [], // filter out models to operate on
-    make: false, // if true, generate migration files
-    apply: false, // save schema changes, optional message
-    create: false, // if true, recreate database from snapshot (up)
-    destroy: false, // if true, drop all tables from snapshot (down)
-    up: false, // if true, apply all pending migrations
-    down: false, // if true, revert all applied migrations
-    next: false, // if true, apply just one pending migration
-    prev: false, // if true, revert last applied migration
-    from: null, // range for multiple migrations, use with --to
-    to: null, // range for multiple migrations, use with --from
-  },
-  // optional logger interface:
-  /* logger: {
-       error() {},
-       message() {},
-   },
-  */
-};
-
 const cli = require('json-schema-sequelizer/cli');
+const cmd = process.argv.slice(2)[0];
 
 let _error;
-let _conn;
 
 function db(cb) {
-  if (cmd === 'migrate') {
-    // builder is an instance of JSONSchemaSequelizer()
-    return cb(builder);
+  if (cmd === 'migrate' || cmd === 'backup') {
+    return cb(require('./path/to/your/builder/instance'));
   }
 }
 
 Promise.resolve()
   .then(() => db(x => x.connect()))
   .then(() => {
-    if (cmd === 'migrate') {
-      return db(x => cli.migrate(x, options));
+    if (cmd === 'migrate' || cmd === 'backup') {
+      return db(x => cli.execute(x));
     }
 
-    process.stderr.write(`${USAGE_INFO}\n`);
+    process.stderr.write(`${cli.usage('bin/db')}\n`);
     process.exit(1);
   })
   .catch(e => {
@@ -319,49 +314,21 @@ Abstract methods for CRUDs:
 ```js
   .then(() => {
     // prepare the resource handler
-    const res = JSONSchemaSequelizer.resource(builder.models.Tag);
+    const res = JSONSchemaSequelizer.resource(builder, null, 'Tag');
 
     // resource details, references and UI
     console.log(JSON.stringify(res.options, null, 2));
     /*
     {
-      "ref": {
-        "primaryKey": "id",
-        "singular": "Tag",
-        "plural": "Tags",
-        "model": "Tag"
-      },
+      "model": "Tag",
       "refs": {
-        "children": {
-          "type": "HasMany",
-          "model": "Tag",
-          "plural": "Tags",
-          "singular": "Tag",
-          "foreignKey": "TagId",
-          "primaryKey": "id"
-        }
+        "Tag": { ... },
+        "children": { ... },
+        "dataTypes": { ... }
       },
-      "schema": {
-        "properties": {
-          "id": {
-            "type": "integer",
-            "minimum": 1
-          },
-          "name": {
-            "type": "string"
-          },
-          "children": {
-            "items": {
-              "$ref": "Tag"
-            }
-          }
-        },
-        "required": [
-          "id",
-          "name"
-        ]
-      },
-      "uiSchema": {},
+      "schema": { ... },
+      "uiSchema": { ... },
+      "attributes": { ... }
     }
     */
 
@@ -376,13 +343,11 @@ Abstract methods for CRUDs:
             { name: 'Leaf B' },
           ],
         })
-        .then(result => {
-          console.log(result.id); // 3
-          console.log(result.name); // Root
-          console.log(result.children[0].id); // 4
-          console.log(result.children[0].name); // Leaf A
-          console.log(result.children[1].name); // Leaf B
-        });
+          .then(pk => res.actions.findOne({ where: { id: pk } }))
+          .then(result => {
+            assert(result.id === 3);
+            assert(result.name === 'Root');
+          });
       })
       .then(() => {
         return res.actions.update({
@@ -390,23 +355,23 @@ Abstract methods for CRUDs:
           children: [
             { name: 'Leaf X', id: 4 },
           ],
-        }, { id: 3 });
+        }, { where: { id: 3 } });
       })
       .then(() => {
-        // attribute filters are taken from uiFields
-        builder.models.Tag.options.$uiFields = {
+        // attribute filters are taken from attribuets
+        builder.models.Tag.options.$attributes = {
           findOne: [
-            { prop: 'name' },
-            { prop: 'children.name' },
+            'name',
+            'children.name',
           ],
         };
 
         return res.actions.findOne({
-          id: 3,
+          where: { id: 3 },
         }).then(result => {
-          console.log(result.name); // Roots
-          console.log(result.children[0].name); // Leaf X
-          console.log(result.children[1].name); // Leaf B
+          assert(result.name === 'Roots');
+          assert(result.children[0].name === 'Leaf X');
+          assert(result.children[1].name === 'Leaf B');
         });
       });
   })
@@ -414,7 +379,7 @@ Abstract methods for CRUDs:
 
 ## CRUD example
 
-RESTful API in ~70 LOC:
+RESTful API in ~80 LOC:
 
 ```js
   .then(() => {
@@ -435,9 +400,9 @@ RESTful API in ~70 LOC:
           headers = arguments[2];
         }
 
-        res.writeHead(status, {
+        res.writeHead(status, Object.assign({
           'Content-Type': 'application/json',
-        });
+        }, headers));
 
         res.end(JSON.stringify(result));
       }
@@ -450,16 +415,15 @@ RESTful API in ~70 LOC:
         return;
       }
 
-      // resource handler and options
-      const obj = JSONSchemaSequelizer.resource(builder.models[model]);
-
-      // filters for the current resource
-      const where = {
-        [obj.options.ref.primaryKey]: param,
-      };
-
       // model found
       if (builder.models[model]) {
+        const where = {
+          [builder.models[model].primaryKeyAttribute]: param,
+        };
+
+        // resource handler and options
+        const obj = JSONSchemaSequelizer.resource(builder, null, model);
+
         // write operations
         if (req.method === 'POST') {
           let data = '';
@@ -475,7 +439,7 @@ RESTful API in ~70 LOC:
               const payload = JSON.parse(data);
 
               if (param) {
-                obj.actions.update(payload, where).then(end);
+                obj.actions.update(payload, { where }).then(end);
               } else {
                 obj.actions.create(payload).then(end);
               }
@@ -486,9 +450,9 @@ RESTful API in ~70 LOC:
         } else if (param) {
           // found params, read/destroy
           if (req.method === 'DELETE') {
-            obj.actions.destroy(where).then(end);
+            obj.actions.destroy({ where }).then(end);
           } else {
-            obj.actions.findOne(where).then(end);
+            obj.actions.findOne({ where }).then(end);
           }
         } else {
           // return resource options
@@ -498,8 +462,7 @@ RESTful API in ~70 LOC:
         // unknown resource
         end(400, { error: 'unknown' });
       }
-    })
-    .listen(8080);
+    }).listen(8080);
 
     console.log('Server running at http://localhost:8080/');
 
@@ -552,23 +515,25 @@ E.g., if you've defined `PostTags` it will be used instead, otherwise the option
 ## Instance properties
 
 - `sequelize` &mdash; Holds the current Sequelize connection
+- `schemas` &mdash; Normalized schemas from loaded models
 - `models` &mdash; A proxy for `sequelize.models`
-- `refs` &mdash; All registered schemas. Additional fields will be present as result of associated models
+- `$refs` &mdash; All registered schemas. Additional fields will be present as result of associated models
 
 ## Instance methods
 
 - `add(definition)` &mdash; Define a new model on Sequelize. The `$schema` property is mandatory for modules only (this way), everything else will become the Sequelize model
 - `scan(callback)` &mdash; Scan models and definitions from given `cwd`. Only JSON files does not require the top-level `$schema` keyword
+- `refs(directory[, prefix])` &mdash; Will invoke static `refs()` to include found definitions in the current instance.
 - `sync(options)` &mdash; Calls `sequelize.sync()` with the given options
 - `close()` &mdash; Calls `sequelize.close()`
 - `connect()` &mdash; Starts a new Sequelize connection once. Next calls will receive the same connection instance
-- `rehydrate(bundle)`&mdash; Load given bundle on the current connection. Useful for recreating the database structure from JSON-Schema
 
 ## Static methods
 
-- `bundle(schemas, definitions, description)`  &mdash; Generate a bundle with all models and additional references as JSON-Schema
-- `generate(dump, models, definitions, squashMigrations)`  &mdash; Generate javascript code of the current schema in form of migrations
-- `resource(model, options)`&mdash; Abstract CRUD wrapper
-- `migrate(sequelize, options, bind)`&mdash; Executes a plain migration if `bind` is `true`, instantiate a umzug wrapper otherwise. When binding ensure you pass a valid object with `up/down/change` functions
-- `sync(models, options)`&mdash; WIll call `sequelize.sync()` by executing definitions in order, all dependencies are synced first, dependants last
-- `clear(models, options)`&mdash; Will call `model.destroy()` on each instance, providing a `truncate` or `where` option is mandatory
+- `bundle(schemas, definitions[, description])`  &mdash; Generate a bundle with all models and additional references as JSON-Schema
+- `generate(dump, models, definitions[, squashMigrations])`  &mdash; Generate javascript code of the current schema in form of migrations
+- `resource(sequelize, options, model)`&mdash; Abstract CRUD wrapper for RESTful resources. It returns a functional API to read, update and delete from given model
+- `migrate(sequelize, options[, bind])`&mdash; Executes a plain migration if `bind` is `true`, instantiate a umzug wrapper otherwise. When binding ensure you pass a valid object with `up/down/change` functions
+- `sync(models[, options])`&mdash; WIll call `sequelize.sync()` by executing definitions in order, all dependencies are synced first, dependants last
+- `clear(models[, options])`&mdash; Will call `model.destroy()` on each instance, providing a `truncate` or `where` option is mandatory
+- `refs(directory[, prefix])` &mdash; Scan and load for `*.json` definitions. Set `prefix` to filter out scanned files, e.g. `**/PREFIX/*.json`

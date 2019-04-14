@@ -75,10 +75,12 @@ module.exports = (conn, config) => {
 
         const migrations = glob.sync('*.js', { cwd: migrationsDir });
 
-        if (config.options.create) {
-          fs.outputJsonSync(migrationsFile, migrations, { spaces: 2 });
-        } else {
-          fs.outputFileSync(migrationsFile, '[]');
+        if (!_migrations.database) {
+          if (config.options.create) {
+            fs.outputJsonSync(migrationsFile, migrations, { spaces: 2 });
+          } else {
+            fs.outputFileSync(migrationsFile, '[]');
+          }
         }
 
         return Promise.resolve()

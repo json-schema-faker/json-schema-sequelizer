@@ -1,10 +1,14 @@
 {
   "name": "json-schema-sequelizer",
-  "version": "0.20.1",
+  "version": "0.20.2",
   "main": "lib/index.js",
   "author": "Alvaro Cabrera <pateketrueke@gmail.com>",
   "description": "Sequelize models with JSON-Schema powers!",
   "license": "MIT",
+  "files": [
+    "lib/*",
+    "cli/*"
+  ],
   "scripts": {
     "dev": "npm test -- -w",
     "lint": "eslint lib tests",

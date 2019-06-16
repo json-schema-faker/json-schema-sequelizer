@@ -252,5 +252,7 @@ module.exports = (conn, config) => {
       }
 
       return check();
-    });
+    })
+    .then(() => conn.close())
+    .then(() => process.exit());
 };

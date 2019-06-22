@@ -6,7 +6,6 @@ addons:
   postgresql: '9.5'
 language: node_js
 node_js:
-  - 6
   - 8
   - 9
   - 11

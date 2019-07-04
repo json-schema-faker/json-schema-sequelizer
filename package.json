@@ -22,7 +22,9 @@
     "coverage:unit": "npm run coverage -- npm run test:unit",
     "codecov": "codecov --file=coverage/lcov.info -e TRAVIS_NODE_VERSION",
     "report": "nyc report",
-    "pretest": "npm run lint"
+    "pretest": "npm run lint",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "devDependencies": {
     "chai": "^4.2.0",
@@ -42,6 +44,8 @@
     "glob": "^7.1.2",
     "sequelize": "^5.8.11",
     "umzug": "^2.0.1",
-    "wargs": "^0.8.2"
-  }
+    "wargs": "^0.8.2",
+    "snyk": "^1.189.0"
+  },
+  "snyk": true
 }

@@ -27,8 +27,8 @@
   "devDependencies": {
     "chai": "^4.2.0",
     "codecov": "^3.1.0",
-    "eslint": "^5.9.0",
-    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint": "^6.5.1",
+    "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.8.0",
     "json-schema-ref-parser": "^7.0.1",
     "mocha": "^6.1.2",

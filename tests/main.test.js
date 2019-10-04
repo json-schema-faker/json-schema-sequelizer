@@ -60,7 +60,7 @@ describe('JSONSchemaSequelizer()', () => {
 
     it('should export all given models', () => {
       expect(jss.models.Example).not.to.be.undefined;
-      return expect(Object.keys(jss.models).sort()).to.eql(['Example', 'Prototype']);
+      expect(Object.keys(jss.models).sort()).to.eql(['Example', 'Prototype']);
     });
 
     it('should support basic operations', () => {
@@ -83,7 +83,7 @@ describe('JSONSchemaSequelizer()', () => {
       return jss.scan().sync();
     });
 
-    it('it should accept virtual types', () => {
+    it('should accept virtual types', () => {
       return jss.models.Basic.create({
         foo: 'bar',
         baz: 'buzz',

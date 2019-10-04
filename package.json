@@ -33,9 +33,11 @@
     "json-schema-ref-parser": "^7.0.1",
     "mocha": "^6.1.2",
     "nyc": "^14.0.0",
+    "sqlite3": "^4.1.0"
+  },
+  "optionalDependencies": {
     "pg": "^7.4.0",
-    "pg-native": "^3.0.0",
-    "sqlite3": "^4.0.0"
+    "pg-native": "^3.0.0"
   },
   "dependencies": {
     "fs-extra": "^8.0.1",

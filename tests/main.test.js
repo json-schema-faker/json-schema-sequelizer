@@ -56,6 +56,14 @@ describe('JSONSchemaSequelizer()', () => {
       expect(typeof (new jss.models.Example({
         name: 'foo',
       })).save().then).to.eql('function');
+
+      const tmp = [];
+      const log = out => tmp.push(out);
+
+      return jss.models.Prototype.get(log)
+        .then(() => {
+          expect(tmp[0]).to.contain('>= 3');
+        });
     });
 
     it('should export all given models', () => {

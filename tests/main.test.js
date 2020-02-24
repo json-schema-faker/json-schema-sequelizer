@@ -179,6 +179,7 @@ describe('JSONSchemaSequelizer()', () => {
 
       jss.models.Blog.options.$attributes = {
         findAll: ['name', 'myPosts.title', 'featuredPost.title'],
+        search: ['name'],
       };
 
       return Promise.resolve()
@@ -195,7 +196,7 @@ describe('JSONSchemaSequelizer()', () => {
             body: 'OK',
           },
         }))
-        .then(pk => Blog.actions.findOne({ where: { id: pk } }))
+        .then(() => Blog.actions.findOne({ search: '^osom' }))
         .then(result => expect(result).to.eql({
           id: 3,
           name: 'Osom blog!',

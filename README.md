@@ -3,6 +3,7 @@
 [![NPM version](https://badge.fury.io/js/json-schema-sequelizer.png)](http://badge.fury.io/js/json-schema-sequelizer)
 [![travis-ci](https://api.travis-ci.org/json-schema-faker/json-schema-sequelizer.svg)](https://travis-ci.org/json-schema-faker/json-schema-sequelizer)
 [![codecov](https://codecov.io/gh/json-schema-faker/json-schema-sequelizer/branch/master/graph/badge.svg)](https://codecov.io/gh/json-schema-faker/json-schema-sequelizer)
+[![Known Vulnerabilities](https://snyk.io/test/npm/json-schema-sequelizer/badge.svg)](https://snyk.io/test/npm/json-schema-sequelizer)
 
 Declare your Sequelize models using JSON-Schema today!
 

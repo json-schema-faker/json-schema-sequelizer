@@ -1,7 +1,5 @@
 const JSONSchemaSequelizer = require('..');
 
-let jss = null;
-
 module.exports.setup = (options, refs, cwd) => {
   const config = {
     username: process.env.CI ? 'postgres' : process.env.LOGNAME,
@@ -15,7 +13,5 @@ module.exports.setup = (options, refs, cwd) => {
     },
   };
 
-  jss = new JSONSchemaSequelizer(config, refs, cwd);
-
-  return jss;
+  return new JSONSchemaSequelizer(config, refs, cwd);
 };

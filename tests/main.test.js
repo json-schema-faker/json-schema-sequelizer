@@ -92,10 +92,15 @@ describe('JSONSchemaSequelizer()', () => {
     });
 
     it('should accept virtual types', () => {
+      jss.models.Basic.getterMethods = {
+        bar: () => 42,
+      };
+
       return jss.models.Basic.create({
         foo: 'bar',
         baz: 'buzz',
       }).then(result => {
+        expect(result.bar).to.eql(42);
         expect(result.foo).to.eql('bar');
         expect(result.baz).to.be.undefined;
       });

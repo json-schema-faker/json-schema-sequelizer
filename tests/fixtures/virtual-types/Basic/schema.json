@@ -4,6 +4,10 @@
     "foo": {
       "type": "string",
       "virtual": true
+    },
+    "bar": {
+      "type": "number",
+      "virtual": true
     }
   },
   "required": ["foo"]

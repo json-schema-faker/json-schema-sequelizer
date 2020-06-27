@@ -88,7 +88,7 @@ settings.forEach(config => {
         });
       }).then(() => {
         return Cart.actions.create(data)
-          .then(pk => jss.models.Cart.findByPk(pk));
+          .then(row => jss.models.Cart.findByPk(row.id));
       }).then(row => {
         return row.getItems({
           order: ['createdAt'],
@@ -119,8 +119,8 @@ settings.forEach(config => {
             id: 1,
           },
         });
-      }).then(pk => {
-        expect(pk).to.eql(1);
+      }).then(row => {
+        expect(row.id).to.eql(1);
       });
     });
 
@@ -186,7 +186,7 @@ settings.forEach(config => {
             { qty: 2, Product: { id: 1, name: 'Test', price: 1.23 } },
           ],
         }))
-        .then(pk => Cart.actions.findOne({ where: { id: pk } }).then(x => {
+        .then(row => Cart.actions.findOne({ where: { id: row.id } }).then(x => {
           expect((x.items.reduce((a, b) => a + (b.Product.price * b.qty), 0)).toFixed(2)).to.eql('4.84');
         }))
         .then(() => Cart.actions.count().then(x => expect(x).to.eql(1)))
@@ -202,7 +202,7 @@ settings.forEach(config => {
             { id: 5, qty: 1, Product: { id: 2 } },
           ],
         }, { where: { id: 2 } }))
-        .then(pk => Cart.actions.findOne({ where: { id: pk } }).then(x => {
+        .then(row => Cart.actions.findOne({ where: { id: row.id } }).then(x => {
           expect((x.items.reduce((a, b) => a + (b.Product.price * b.qty), 0)).toFixed(2)).to.eql('2.62');
         }));
     });

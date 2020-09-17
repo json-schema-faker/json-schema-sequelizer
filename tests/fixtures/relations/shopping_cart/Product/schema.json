@@ -9,6 +9,18 @@
     "price": {
       "type": "number",
       "value": "decimal"
+    },
+    "images": {
+      "type": "array",
+      "items": {
+        "$ref": "File"
+      }
+    },
+    "image": {
+      "$ref": "File"
+    },
+    "image2": {
+      "$ref": "File"
     }
   },
   "required": [

@@ -228,6 +228,45 @@ settings.forEach(config => {
         });
     });
 
+    it('should associate attachments through files and data-uri', () => {
+      const Product = JSONSchemaSequelizer.resource(jss, {
+        attachments: {
+          files: {
+            foo: {
+              path: '/tmp/uploads/bar',
+            },
+            baz: [{
+              path: '/tmp/uploads/buzz',
+            }, {
+              path: '/tmp/uploads/bazzinga',
+            }],
+          },
+          baseDir: '/tmp',
+          uploadDir: 'uploads',
+        },
+      }, 'Product');
+
+      return Promise.resolve()
+        .then(() => Product.actions.create({
+          name: 'Test',
+          price: 0.99,
+          image: 'data:foo/bar;base64,x',
+          image2: {
+            $upload: 'foo',
+          },
+          images: [
+            { $upload: 'baz' },
+          ],
+        }))
+        .then(result => {
+          expect(result.image.imageId).to.eql(result.id);
+          expect(result.image2.image2Id).to.eql(result.id);
+          expect(result.image2.path).to.eql('uploads/bar');
+          expect(result.images[0].ProductId).to.eql(result.id);
+          expect(result.images[1].path).to.eql('uploads/bazzinga');
+        });
+    });
+
     it('should close on finish', () => {
       jss.close();
     });

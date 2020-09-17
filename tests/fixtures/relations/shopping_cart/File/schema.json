@@ -1,0 +1,26 @@
+{
+  "id": "File",
+  "properties": {
+    "id": {
+      "type": "integer",
+      "primaryKey": true,
+      "autoIncrement": true
+    },
+    "mtime": {
+      "type": "string",
+      "format": "datetime"
+    },
+    "name": {
+      "type": "string"
+    },
+    "path": {
+      "type": "string"
+    },
+    "size": {
+      "type": "integer"
+    },
+    "type": {
+      "type": "string"
+    }
+  }
+}

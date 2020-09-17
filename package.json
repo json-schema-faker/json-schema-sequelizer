@@ -15,7 +15,7 @@
     "test": "npm run test:unit --",
     "test:ci": "npm run coverage:all && npm run report -- -r lcov",
     "test:all": "npm run test:run tests && npm run report -- -r html",
-    "test:run": "NODE_ENV=test _mocha --exit --recursive -bR spec",
+    "test:run": "NODE_ENV=test _mocha --exit --colors --recursive -bR spec",
     "test:unit": "npm run test:run tests --",
     "coverage": "nyc -x '**/tests/**' -x '**/*.test.js'",
     "coverage:all": "npm run coverage -- npm run test:all",

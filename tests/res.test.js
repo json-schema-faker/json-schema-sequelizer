@@ -228,7 +228,7 @@ settings.forEach(config => {
         });
     });
 
-    it('should associate attachments through files and data-uri', () => {
+    it('should handle attachments through files and data-uri', () => {
       const Product = JSONSchemaSequelizer.resource(jss, {
         attachments: {
           files: {

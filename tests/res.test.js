@@ -267,6 +267,50 @@ settings.forEach(config => {
         });
     });
 
+    it('should handle attachments from nested associations', () => {
+      const Product = JSONSchemaSequelizer.resource(jss, 'Product');
+
+      Cart = JSONSchemaSequelizer.resource(jss, {
+        attachments: {
+          files: {
+            ok: {
+              path: '/tmp/uploads/bar',
+            },
+          },
+          baseDir: '/tmp',
+          uploadDir: 'uploads',
+        },
+      }, 'Cart');
+
+      jss.models.Product.options.$attributes = {
+        findOne: ['name', 'price', 'image.path'],
+      };
+
+      jss.models.Cart.options.$attributes = {
+        findOne: ['items.name', 'items.price', 'items.image.path'],
+      };
+
+      return Promise.resolve()
+        .then(() => Cart.actions.create({
+          items: [
+            {
+              qty: 3,
+              Product: {
+                name: 'Test',
+                price: 0.99,
+                image: { $upload: 'ok' },
+              },
+            },
+          ],
+        }))
+        .then(row => Cart.actions.findOne({ where: { id: row.id } }))
+        .then(result => {
+          expect(result.items[0].Product.image.path).to.eql('uploads/bar');
+          return Product.actions.findOne({ where: { id: result.items[0].ProductId } })
+            .then(data => expect(data.image.path).to.eql('uploads/bar'));
+        });
+    });
+
     it('should close on finish', () => {
       jss.close();
     });

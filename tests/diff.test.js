@@ -285,12 +285,17 @@ describe('diff-builder', () => {
       const AnyModel = util.fixRefs(jss.models.AnyModel.options.$schema, true);
       const anyModelMigration = diff.build('AnyModel', jss.models, {}, AnyModel, diff.map({}, AnyModel));
 
-      const integerType = PK => {
+      const integerType = (PK, table, unique) => {
         return {
           type: 'INTEGER',
           allowNull: !PK,
           primaryKey: !!PK,
           defaultValue: undefined,
+          references: {
+            key: 'id',
+            model: table,
+          },
+          unique,
         };
       };
 
@@ -305,12 +310,12 @@ describe('diff-builder', () => {
 
       return Promise.resolve().then(() => {
         return jss.models.ExampleThree.describe().then(result => {
-          expect(result.just_one_id).to.eql(integerType());
+          expect(result.just_one_id).to.eql(integerType(null, 'examples', false));
         });
       }).then(() => {
         return jss.models.AnyModel.describe().then(result => {
-          expect(result.example_two_id).to.eql(integerType(true));
-          expect(result.example_three_id).to.eql(integerType(true));
+          expect(result.example_two_id).to.eql(integerType(true, 'example_two', true));
+          expect(result.example_three_id).to.eql(integerType(true, 'example_threes', true));
         });
       });
     });

@@ -81,30 +81,35 @@ describe('Types support', () => {
               allowNull: true,
               defaultValue: undefined,
               primaryKey: true,
+              unique: false,
             },
             str: {
               type: 'VARCHAR(255)',
               allowNull: false,
               defaultValue: undefined,
               primaryKey: false,
+              unique: false,
             },
             num: {
               type: 'DECIMAL',
               allowNull: false,
               defaultValue: undefined,
               primaryKey: false,
+              unique: false,
             },
             bol: {
               type: 'TINYINT(1)',
               allowNull: false,
               defaultValue: undefined,
               primaryKey: false,
+              unique: false,
             },
             foo: {
               type: 'TEXT',
               allowNull: true,
               defaultValue: undefined,
               primaryKey: false,
+              unique: false,
             },
           });
 

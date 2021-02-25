@@ -1,6 +1,6 @@
 # JSON-Schema Sequelizer
 
-[![NPM version](https://badge.fury.io/js/json-schema-sequelizer.png)](http://badge.fury.io/js/json-schema-sequelizer)
+[![NPM version](https://badge.fury.io/js/json-schema-sequelizer.svg)](http://badge.fury.io/js/json-schema-sequelizer)
 [![Build status](https://github.com/json-schema-faker/json-schema-sequelizer/workflows/build/badge.svg)](https://github.com/json-schema-faker/json-schema-sequelizer/actions)
 [![codecov](https://codecov.io/gh/json-schema-faker/json-schema-sequelizer/branch/master/graph/badge.svg)](https://codecov.io/gh/json-schema-faker/json-schema-sequelizer)
 [![Known Vulnerabilities](https://snyk.io/test/npm/json-schema-sequelizer/badge.svg)](https://snyk.io/test/npm/json-schema-sequelizer)

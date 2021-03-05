@@ -58,13 +58,13 @@ module.exports = (conn, config) => {
           }
         });
 
-        _logger.message(`write ${path.relative(_cwd, schemaJson)}`);
+        _logger.message(`\rwrite ${path.relative(_cwd, schemaJson)}`);
 
         fs.outputJsonSync(schemaJson,
           JSONSchemaSequelizer.bundle(_models, fixedRefs,
             typeof config.options.apply === 'string' && config.options.apply), { spaces: 2 });
 
-        _logger.message(`${_models.length} model${_models.length === 1 ? '' : 's'} exported`);
+        _logger.message(`\r${_models.length} model${_models.length === 1 ? '' : 's'} exported`);
       }
 
       function reset() {
@@ -85,7 +85,7 @@ module.exports = (conn, config) => {
 
         return Promise.resolve()
           .then(() => {
-            _logger.message(`read ${path.relative(_cwd, schemaFile)}`);
+            _logger.message(`\rread ${path.relative(_cwd, schemaFile)}`);
           })
           .then(() => {
             const instance = JSONSchemaSequelizer.migrate(conn.sequelize, require(schemaFile), true);
@@ -98,7 +98,7 @@ module.exports = (conn, config) => {
             return instance[method]();
           })
           .then(() => {
-            _logger.message(`${config.options.create ? 'applied' : 'reverted'} ${path.relative(_cwd, schemaFile)}`);
+            _logger.message(`\r${config.options.create ? 'applied' : 'reverted'} ${path.relative(_cwd, schemaFile)}`);
           });
       }
 
@@ -117,7 +117,7 @@ module.exports = (conn, config) => {
           .then(results => {
             /* istanbul ignore else */
             if (!results.length) {
-              _logger.message('Without changes');
+              _logger.message('\rWithout changes');
               return;
             }
 
@@ -142,7 +142,7 @@ module.exports = (conn, config) => {
               const file = path.join(migrationsDir, `${fulldate}${hourtime}.${key}${name}.js`);
               const src = path.relative(_cwd, file);
 
-              _logger.message(`write ${src}`);
+              _logger.message(`\rwrite ${src}`);
               fs.outputFileSync(file, result.code);
             });
           });
@@ -190,7 +190,7 @@ module.exports = (conn, config) => {
             configFile: migrationsFile,
             baseDir: migrationsDir,
             logging(message) {
-              _logger.message(message);
+              _logger.message(`\r${message}`);
             },
           })[method](params),
         ])
@@ -199,33 +199,33 @@ module.exports = (conn, config) => {
 
             /* istanbul ignore else */
             if (results[0]) {
-              _logger.message(`write ${path.relative(_cwd, schemaFile)}`);
+              _logger.message(`\rwrite ${path.relative(_cwd, schemaFile)}`);
               fs.outputFileSync(schemaFile, results[0].code);
             }
 
             if (!Array.isArray(result)) {
               /* istanbul ignore else */
               if (result.executed && result.executed.length === 0) {
-                _logger.message('No executed migrations');
+                _logger.message('\rNo executed migrations');
               }
 
               /* istanbul ignore else */
               if (result.pending && result.pending.length) {
-                _logger.message('Pending migrations:');
+                _logger.message('\rPending migrations:');
 
                 result.pending.forEach(x => {
-                  _logger.message(`- ${x}`);
+                  _logger.message(`\r- ${x}`);
                 });
               }
 
               /* istanbul ignore else */
               if (result.pending && result.pending.length === 0) {
-                _logger.message('No pending migrations');
+                _logger.message('\rNo pending migrations');
               }
             } else if (!result.length) {
-              _logger.message('No changes were made');
+              _logger.message('\rNo changes were made');
             } else {
-              _logger.message(`${result.length} migration${
+              _logger.message(`\r${result.length} migration${
                 result.length === 1 ? '' : 's'
               } ${
                 result.length === 1 ? 'was' : 'were'

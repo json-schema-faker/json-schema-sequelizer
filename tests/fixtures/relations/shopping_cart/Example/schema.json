@@ -1,0 +1,34 @@
+{
+  "id": "Example",
+  "properties": {
+    "id": {
+      "type": "integer",
+      "primaryKey": true
+    },
+    "title": {
+      "type": "string"
+    },
+    "blob": {
+      "attachment": true,
+      "type": "string"
+    },
+    "url": {
+      "type": "string"
+    },
+    "file": {
+      "$ref": "File"
+    },
+    "fileset": {
+      "type": "array",
+      "items": {
+        "$ref": "File",
+        "belongsToMany": {
+          "through": {
+            "model": "Attachment"
+          }
+        }
+      }
+    }
+  },
+  "required": ["title"]
+}

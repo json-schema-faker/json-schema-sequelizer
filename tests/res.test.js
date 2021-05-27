@@ -311,6 +311,28 @@ settings.forEach(config => {
         });
     });
 
+    it('should process uploads from associated foreignKeys', () => {
+      const Attachment = JSONSchemaSequelizer.resource(jss, {
+        attachments: {
+          files: {
+            ok: {
+              path: '/tmp/uploads/bar',
+            },
+          },
+          baseDir: '/tmp',
+          uploadDir: 'uploads',
+        },
+      }, 'Attachment');
+
+      return Promise.resolve()
+        .then(() => Attachment.actions.create({
+          label: 'test',
+          FileId: { $upload: 'ok' },
+        })).then(result => {
+          expect(result).to.eql({ label: 'test', FileId: 6, id: 1 });
+        });
+    });
+
     it('should close on finish', () => {
       jss.close();
     });

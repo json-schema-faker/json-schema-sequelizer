@@ -1,0 +1,14 @@
+{
+  "id": "Attachment",
+  "properties": {
+    "id": {
+      "type": "integer",
+      "primaryKey": true,
+      "autoIncrement": true
+    },
+    "label": {
+      "type": "string"
+    }
+  },
+  "required": ["label"]
+}

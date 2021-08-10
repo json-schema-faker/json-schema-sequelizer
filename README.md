@@ -315,7 +315,7 @@ Abstract methods for CRUDs:
 ```js
   .then(() => {
     // prepare the resource handler
-    const res = JSONSchemaSequelizer.resource(builder, null, 'Tag');
+    const res = JSONSchemaSequelizer.resource(builder, 'Tag');
 
     // resource details, references and UI
     console.log(JSON.stringify(res.options, null, 2));
@@ -423,7 +423,7 @@ RESTful API in ~80 LOC:
         };
 
         // resource handler and options
-        const obj = JSONSchemaSequelizer.resource(builder, null, model);
+        const obj = JSONSchemaSequelizer.resource(builder, model);
 
         // write operations
         if (req.method === 'POST') {

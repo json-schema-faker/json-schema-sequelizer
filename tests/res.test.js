@@ -87,9 +87,8 @@ settings.forEach(config => {
           price: 1.23,
         });
       }).then(() => {
-        return Cart.actions.create(data)
-          .then(row => jss.models.Cart.findByPk(row.id));
-      }).then(row => {
+        return Cart.actions.create(data);
+      }).then(([row]) => {
         return row.getItems({
           order: ['createdAt'],
         });
@@ -107,7 +106,7 @@ settings.forEach(config => {
       const data = {
         items: [
           {
-            qty: 2,
+            qty: 99,
             ProductId: 1,
           },
         ],
@@ -119,8 +118,11 @@ settings.forEach(config => {
             id: 1,
           },
         });
-      }).then(row => {
-        expect(row.id).to.eql(1);
+      }).then(([affected]) => {
+        expect(affected).to.eql(0);
+        return Cart.actions.findOne({ id: 1 }).then(x => {
+          expect(x.items[1].qty).to.eql(99);
+        });
       });
     });
 
@@ -129,7 +131,7 @@ settings.forEach(config => {
         where: {
           id: 1,
           items: {
-            qty: [2, 5],
+            qty: [99, 5],
           },
         },
         items: {
@@ -160,7 +162,7 @@ settings.forEach(config => {
             }, {
               name: 'Test',
               price: 1.23,
-              quantity: 2,
+              quantity: 99,
             },
           ],
         });
@@ -170,7 +172,8 @@ settings.forEach(config => {
     it('should destroy data from given associations', () => {
       return Promise.resolve().then(() => {
         return Cart.actions.destroy({ where: { id: 1 } });
-      }).then(() => {
+      }).then(affected => {
+        expect(affected).to.eql(1);
         return Promise.all([jss.models.CartItem.count(), jss.models.Product.count(), jss.models.Cart.count()]);
       }).then(result => {
         expect(result).to.eql([0, 2, 0]);
@@ -186,7 +189,7 @@ settings.forEach(config => {
             { qty: 2, Product: { id: 1, name: 'Test', price: 1.23 } },
           ],
         }))
-        .then(row => Cart.actions.findOne({ where: { id: row.id } }).then(x => {
+        .then(([row]) => Cart.actions.findOne({ where: { id: row.id } }).then(x => {
           expect((x.items.reduce((a, b) => a + (b.Product.price * b.qty), 0)).toFixed(2)).to.eql('4.84');
         }))
         .then(() => Cart.actions.count().then(x => expect(x).to.eql(1)))
@@ -202,7 +205,7 @@ settings.forEach(config => {
             { id: 5, qty: 1, Product: { id: 2 } },
           ],
         }, { where: { id: 2 } }))
-        .then(row => Cart.actions.findOne({ where: { id: row.id } }).then(x => {
+        .then(() => Cart.actions.findOne({ where: { id: 2 } }).then(x => {
           expect((x.items.reduce((a, b) => a + (b.Product.price * b.qty), 0)).toFixed(2)).to.eql('2.62');
         }));
     });
@@ -258,7 +261,7 @@ settings.forEach(config => {
             { $upload: 'baz' },
           ],
         }))
-        .then(result => {
+        .then(([, result]) => {
           expect(result.image.imageId).to.eql(result.id);
           expect(result.image2.image2Id).to.eql(result.id);
           expect(result.image2.path).to.eql('uploads/bar');
@@ -303,7 +306,7 @@ settings.forEach(config => {
             },
           ],
         }))
-        .then(row => Cart.actions.findOne({ where: { id: row.id } }))
+        .then(([row]) => Cart.actions.findOne({ where: { id: row.id } }))
         .then(result => {
           expect(result.items[0].Product.image.path).to.eql('uploads/bar');
           return Product.actions.findOne({ where: { id: result.items[0].ProductId } })
@@ -328,7 +331,7 @@ settings.forEach(config => {
         .then(() => Attachment.actions.create({
           label: 'test',
           FileId: { $upload: 'ok' },
-        })).then(result => {
+        })).then(([, result]) => {
           expect(result).to.eql({ label: 'test', FileId: 6, id: 1 });
         });
     });

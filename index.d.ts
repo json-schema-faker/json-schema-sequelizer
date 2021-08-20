@@ -134,4 +134,17 @@ export interface ResourceModel<T> {
 export interface ModelDefinition {
   $class?: ModelCtor<Model>;
   $schema: JSONSchema4;
+  $uiSchema?: JsonObject;
+  $attributes?: ModelAttributes;
 }
+
+export interface ModelAttributes {
+  findAll?: ModelAttribute[];
+  findOne?: ModelAttribute[];
+  destroy?: ModelAttribute[];
+  create?: ModelAttribute[];
+  update?: ModelAttribute[];
+  count?: ModelAttribute[];
+}
+
+export type ModelAttribute = string | { prop: string };

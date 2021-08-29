@@ -5,9 +5,11 @@
   "author": "Alvaro Cabrera <pateketrueke@gmail.com>",
   "description": "Sequelize models with JSON-Schema powers!",
   "license": "MIT",
+  "types": "index.d.ts",
   "files": [
     "lib/*",
-    "cli/*"
+    "cli/*",
+    "*.d.ts"
   ],
   "scripts": {
     "dev": "npm test -- -w",

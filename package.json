@@ -48,7 +48,7 @@
     "fs-extra": "^9.0.0",
     "glob": "^7.1.2",
     "json-schema-ref-parser": "^9.0.1",
-    "sequelize": "^6.6.5",
+    "sequelize": "^6.12.2",
     "type-fest": "^2.0.0",
     "umzug": "^2.0.1",
     "wargs": "^0.9.1"

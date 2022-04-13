@@ -534,7 +534,7 @@ E.g., if you've defined `PostTags` it will be used instead, otherwise the option
 - `bundle(schemas, definitions[, description])`  &mdash; Generate a bundle with all models and additional references as JSON-Schema
 - `generate(dump, models, definitions[, squashMigrations])`  &mdash; Generate javascript code of the current schema in form of migrations
 - `resource(sequelize, options, model)`&mdash; Abstract CRUD wrapper for RESTful resources. It returns a functional API to read, update and delete from given model
-- `migrate(sequelize, options[, bind])`&mdash; Executes a plain migration if `bind` is `true`, instantiate a umzug wrapper otherwise. When binding ensure you pass a valid object with `up/down/change` functions
+- `migrate(sequelize, options[, bind])`&mdash; Executes a plain migration if `bind` is `true`, instantiate a umzug wrapper otherwise. When binding ensure you pass a valid object with `up/down` functions
 - `sync(models[, options])`&mdash; WIll call `sequelize.sync()` by executing definitions in order, all dependencies are synced first, dependants last
 - `clear(models[, options])`&mdash; Will call `model.destroy()` on each instance, providing a `truncate` or `where` option is mandatory
 - `refs(directory[, prefix])` &mdash; Scan and load for `*.json` definitions. Set `prefix` to filter out scanned files, e.g. `**/PREFIX/*.json`

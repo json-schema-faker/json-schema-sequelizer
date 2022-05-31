@@ -20,12 +20,23 @@ jobs:
         ports:
           - 5432:5432
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
       - uses: actions/setup-node@v1
-      - run: npm ci
+
+      - uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+
       -
-        run: npm run test:ci
+        run: |
+          npm i
+          npm run test:ci
         env:
           POSTGRES_HOST: localhost
           POSTGRES_PORT: 5432
+
       - run: npm run codecov

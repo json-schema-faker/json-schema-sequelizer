@@ -9,27 +9,6 @@ function dir(subdir) {
   return path.join(__dirname, 'fixtures', subdir);
 }
 
-const refs = [
-  {
-    id: 'dataTypes',
-    definitions: {
-      primaryKey: {
-        allOf: [
-          {
-            type: 'integer',
-          }, {
-            minimum: 1,
-          }, {
-            primaryKey: true,
-          }, {
-            autoIncrement: true,
-          },
-        ],
-      },
-    },
-  },
-];
-
 let jss = null;
 
 /* global beforeEach, describe, it */
@@ -40,7 +19,7 @@ describe('JSONSchemaSequelizer()', () => {
       jss = t.setup({
         dialect: 'sqlite',
         storage: ':memory:',
-      }, refs, dir('basic'));
+      }, t.refs, dir('basic'));
 
       return jss.scan().sync();
     });
@@ -86,7 +65,7 @@ describe('JSONSchemaSequelizer()', () => {
       jss = t.setup({
         dialect: 'sqlite',
         storage: ':memory:',
-      }, refs, dir('virtual-types'));
+      }, t.refs, dir('virtual-types'));
 
       return jss.scan().sync();
     });
@@ -112,7 +91,7 @@ describe('JSONSchemaSequelizer()', () => {
       jss = t.setup({
         dialect: 'sqlite',
         storage: ':memory:',
-      }, refs, dir('relations/blog_site'));
+      }, t.refs, dir('relations/blog_site'));
 
       return jss.scan().sync();
     });

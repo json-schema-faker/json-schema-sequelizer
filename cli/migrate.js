@@ -38,10 +38,7 @@ module.exports = (conn, config) => {
         .filter(x => (_allowed.length ? _allowed.indexOf(x) !== -1 : true))
         .map(x => conn.models[x]);
 
-      const _logger = config.logger || {};
-
-      _logger.error = _logger.error || console.error.bind(console);
-      _logger.message = _logger.message || console.log.bind(console);
+      const _logger = conn.sequelize.options.logging || (() => { /* noop */ });
 
       const schemaFile = path.join(_baseDir, 'schema.js');
       const schemaJson = path.join(_baseDir, 'schema.json');
@@ -58,13 +55,13 @@ module.exports = (conn, config) => {
           }
         });
 
-        _logger.message(`\rwrite ${path.relative(_cwd, schemaJson)}`);
+        _logger(`\rwrite ${path.relative(_cwd, schemaJson)}`);
 
         fs.outputJsonSync(schemaJson,
           JSONSchemaSequelizer.bundle(_models, fixedRefs,
             typeof config.options.apply === 'string' && config.options.apply), { spaces: 2 });
 
-        _logger.message(`\r${_models.length} model${_models.length === 1 ? '' : 's'} exported`);
+        _logger(`\r${_models.length} model${_models.length === 1 ? '' : 's'} exported`);
       }
 
       function reset() {
@@ -85,7 +82,7 @@ module.exports = (conn, config) => {
 
         return Promise.resolve()
           .then(() => {
-            _logger.message(`\rread ${path.relative(_cwd, schemaFile)}`);
+            _logger(`\rread ${path.relative(_cwd, schemaFile)}`);
           })
           .then(() => {
             const instance = JSONSchemaSequelizer.migrate(conn.sequelize, require(schemaFile), true);
@@ -98,7 +95,7 @@ module.exports = (conn, config) => {
             return instance[method]();
           })
           .then(() => {
-            _logger.message(`\r${config.options.create ? 'applied' : 'reverted'} ${path.relative(_cwd, schemaFile)}`);
+            _logger(`\r${config.options.create ? 'applied' : 'reverted'} ${path.relative(_cwd, schemaFile)}`);
           });
       }
 
@@ -117,7 +114,7 @@ module.exports = (conn, config) => {
           .then(results => {
             /* istanbul ignore else */
             if (!results.length) {
-              _logger.message('\rWithout changes');
+              _logger('\rWithout changes');
               return;
             }
 
@@ -142,7 +139,7 @@ module.exports = (conn, config) => {
               const file = path.join(migrationsDir, `${fulldate}${hourtime}.${key}${name}.js`);
               const src = path.relative(_cwd, file);
 
-              _logger.message(`\rwrite ${src}`);
+              _logger(`\rwrite ${src}`);
               fs.outputFileSync(file, result.code);
             });
           });
@@ -190,7 +187,7 @@ module.exports = (conn, config) => {
             configFile: migrationsFile,
             baseDir: migrationsDir,
             logging(message) {
-              _logger.message(`\r${message}`);
+              _logger(`\r${message}`);
             },
           })[method](params),
         ])
@@ -199,33 +196,33 @@ module.exports = (conn, config) => {
 
             /* istanbul ignore else */
             if (results[0]) {
-              _logger.message(`\rwrite ${path.relative(_cwd, schemaFile)}`);
+              _logger(`\rwrite ${path.relative(_cwd, schemaFile)}`);
               fs.outputFileSync(schemaFile, results[0].code);
             }
 
             if (!Array.isArray(result)) {
               /* istanbul ignore else */
               if (result.executed && result.executed.length === 0) {
-                _logger.message('\rNo executed migrations');
+                _logger('\rNo executed migrations');
               }
 
               /* istanbul ignore else */
               if (result.pending && result.pending.length) {
-                _logger.message('\rPending migrations:');
+                _logger('\rPending migrations:');
 
                 result.pending.forEach(x => {
-                  _logger.message(`\r- ${x}`);
+                  _logger(`\r- ${x}`);
                 });
               }
 
               /* istanbul ignore else */
               if (result.pending && result.pending.length === 0) {
-                _logger.message('\rNo pending migrations');
+                _logger('\rNo pending migrations');
               }
             } else if (!result.length) {
-              _logger.message('\rNo changes were made');
+              _logger('\rNo changes were made');
             } else {
-              _logger.message(`\r${result.length} migration${
+              _logger(`\r${result.length} migration${
                 result.length === 1 ? '' : 's'
               } ${
                 result.length === 1 ? 'was' : 'were'
@@ -253,6 +250,5 @@ module.exports = (conn, config) => {
 
       return check();
     })
-    .then(() => conn.close())
-    .then(() => process.exit());
+    .then(() => conn.close());
 };

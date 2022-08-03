@@ -17,7 +17,7 @@
     "test": "npm run test:unit --",
     "test:ci": "npm run coverage:all && npm run report -- -r lcov",
     "test:all": "npm run test:run tests && npm run report -- -r html",
-    "test:run": "NODE_ENV=test _mocha --exit --colors --recursive -bR spec",
+    "test:run": "NODE_ENV=test _mocha --exit --colors --recursive --watch-ignore '**/sandbox/**' -bR spec",
     "test:unit": "npm run test:run tests --",
     "coverage": "nyc -x '**/tests/**' -x '**/*.test.js'",
     "coverage:all": "npm run coverage -- npm run test:all",
@@ -34,21 +34,20 @@
     "eslint-plugin-import": "^2.8.0",
     "mocha": "^8.2.1",
     "nyc": "^15.1.0",
-    "sqlite3": "^5.0.0"
+    "pg": "^8.7.3",
+    "sqlite3": "^5.0.0",
+    "testdouble": "^3.16.6"
   },
-  "optionalDependencies": {
-    "pg": "^8.1.0",
-    "pg-native": "^3.0.0"
-  },
+  "optionalDependencies": {},
   "dependencies": {
     "@types/json-schema": "^7.0.9",
     "@types/umzug": "^2.3.2",
-    "fs-extra": "^9.0.0",
-    "glob": "^7.1.2",
+    "fs-extra": "^10.1.0",
+    "glob": "^8.0.3",
     "json-schema-ref-parser": "^9.0.1",
     "sequelize": "^6.12.2",
     "type-fest": "^2.0.0",
-    "umzug": "^2.0.1",
+    "umzug": "^3.1.1",
     "wargs": "^0.9.1"
   }
 }

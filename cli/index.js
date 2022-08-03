@@ -40,7 +40,7 @@ function runHook(db, cmd, argv) {
   cmd = cmd || (argv._ && argv._[0]);
 
   const all = argv._ ? argv._.slice(1) : [];
-  const opts = argv.flags || {};
+  const opts = { ...argv.flags };
 
   return require(`./${cmd}`)(db, {
     migrations: all,

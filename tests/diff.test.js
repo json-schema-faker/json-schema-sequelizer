@@ -304,8 +304,8 @@ describe('diff-builder', () => {
 
       /* eslint-disable */
       expect(example3Migration).to.contain('// manyOfThem <ExampleTwo>\n        justOneId: {\n          type: dataTypes.INTEGER,\n          references: {\n            model: \'examples\',\n            key: \'id\',\n          },\n          onDelete: \'SET NULL\',\n          onUpdate: \'CASCADE\',\n        },');
-      expect(anyModelMigration).to.contain('example_three_id: {\n          type: dataTypes.INTEGER,\n          modelName: \'ExampleThree\',\n          references: {\n            model: \'ExampleThrees\',\n            key: \'id\',\n          },\n          primaryKey: true,\n          onDelete: \'CASCADE\',\n          onUpdate: \'CASCADE\',\n        },');
-      expect(anyModelMigration).to.contain('example_two_id: {\n          type: dataTypes.INTEGER,\n          modelName: \'ExampleTwo\',\n          references: {\n            model: \'example_two\',\n            key: \'id\',\n          },\n          primaryKey: true,\n          onDelete: \'CASCADE\',\n          onUpdate: \'CASCADE\',\n        },');
+      expect(anyModelMigration).to.contain('example_three_id: {\n          type: dataTypes.INTEGER,\n          modelName: \'ExampleThree\',\n          references: {\n            model: \'ExampleThrees\',\n            key: \'id\',\n          },\n          onDelete: \'CASCADE\',\n          onUpdate: \'CASCADE\',\n        },');
+      expect(anyModelMigration).to.contain('example_two_id: {\n          type: dataTypes.INTEGER,\n          modelName: \'ExampleTwo\',\n          references: {\n            model: \'example_two\',\n            key: \'id\',\n          },\n          onDelete: \'CASCADE\',\n          onUpdate: \'CASCADE\',\n        },');
       /* eslint-enable */
 
       return Promise.resolve().then(() => {

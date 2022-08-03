@@ -23,10 +23,7 @@ module.exports = (conn, config) => {
     .filter(x => (_allowed.length ? _allowed.indexOf(x) !== -1 : true))
     .map(x => conn.models[x]);
 
-  const _logger = config.logger || {};
-
-  _logger.error = _logger.error || console.error.bind(console);
-  _logger.message = _logger.message || console.log.bind(console);
+  const _logger = conn.sequelize.options.logging || (() => { /* noop */ });
 
   function load() {
     /* istanbul ignore else */
@@ -46,13 +43,13 @@ module.exports = (conn, config) => {
 
           /* istanbul ignore else */
           if (!file) {
-            return _logger.message(`${x.name} was skipped`);
+            return _logger(`\r${x.name} was skipped`);
           }
 
           return x
             .bulkCreate(fs.readJsonSync(path.join(src, file)))
             .then(() => {
-              _logger.message(`${x.name} was loaded`);
+              _logger(`\r${x.name} was loaded`);
             });
         })))
       .then(() => _umzug.run(after));
@@ -96,7 +93,7 @@ module.exports = (conn, config) => {
 
             fs.outputJsonSync(file, result.data, { spaces: 2 });
 
-            return _logger.message(`write ${path.relative(_cwd, file)}`);
+            return _logger(`\rwrite ${path.relative(_cwd, file)}`);
           }
 
           _buffer.push(`\r\n--- BEGIN ${result.model.name} ---\n${JSON.stringify(result.data, null, 2)}\n--- END ${result.model.name} ---\n`);
@@ -104,7 +101,7 @@ module.exports = (conn, config) => {
 
         /* istanbul ignore else */
         if (_buffer.length) {
-          _logger.message(_buffer.join(''));
+          _logger(_buffer.join(''));
         }
       });
   }

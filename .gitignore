@@ -4,4 +4,5 @@
 .nyc_output
 coverage
 node_modules
+tests/sandbox
 package-lock.json

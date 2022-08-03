@@ -2,27 +2,6 @@ const { expect } = require('chai');
 const JSONSchemaSequelizer = require('../lib');
 const t = require('./_sequelize');
 
-const refs = [
-  {
-    id: 'dataTypes',
-    definitions: {
-      primaryKey: {
-        allOf: [
-          {
-            type: 'integer',
-          }, {
-            minimum: 1,
-          }, {
-            primaryKey: true,
-          }, {
-            autoIncrement: true,
-          },
-        ],
-      },
-    },
-  },
-];
-
 const settings = [
   {
     dialect: 'sqlite',
@@ -43,7 +22,7 @@ const settings = [
 settings.forEach(config => {
   let jss = null;
 
-  jss = t.setup(config, refs, `${__dirname}/fixtures/relations/shopping_cart`);
+  jss = t.setup(config, t.refs, `${__dirname}/fixtures/relations/shopping_cart`);
   jss.scan();
 
   describe(`Resources (${config.dialect})`, () => {

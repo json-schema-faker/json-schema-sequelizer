@@ -24,28 +24,27 @@
     "coverage:unit": "npm run coverage -- npm run test:unit",
     "codecov": "codecov --file=coverage/lcov.info -e TRAVIS_NODE_VERSION",
     "report": "nyc report",
-    "pretest": "npm run lint"
+    "_pretest": "npm run lint"
   },
   "devDependencies": {
     "chai": "^4.2.0",
     "codecov": "^3.1.0",
-    "eslint": "^7.0.0",
+    "eslint": "^7.2.0",
     "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-import": "^2.18.2",
     "mocha": "^8.2.1",
     "nyc": "^15.1.0",
     "pg": "^8.7.3",
     "sqlite3": "^5.0.0",
     "testdouble": "^3.16.6"
   },
-  "optionalDependencies": {},
   "dependencies": {
     "@types/json-schema": "^7.0.9",
     "@types/umzug": "^2.3.2",
     "fs-extra": "^10.1.0",
     "glob": "^8.0.3",
     "json-schema-ref-parser": "^9.0.1",
-    "sequelize": "^6.12.2",
+    "sequelize": "^6.28.0",
     "type-fest": "^2.0.0",
     "umzug": "^3.1.1",
     "wargs": "^0.9.1"

@@ -21,6 +21,9 @@
     },
     "image2": {
       "$ref": "File"
+    },
+    "attachment": {
+      "type": "string"
     }
   },
   "required": [

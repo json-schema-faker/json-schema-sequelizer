@@ -181,14 +181,20 @@ describe('JSONSchemaSequelizer()', () => {
           },
         }))
         .then(() => Blog.actions.findOne({ search: '^osom' }))
-        .then(result => expect(result).to.eql({
-          id: 3,
-          name: 'Osom blog!',
-          myPosts: [
-            { BlogId: 3, id: 3, title: 'This thing works' },
-          ],
-          featuredPost: { featuredPostId: 3, id: 4, title: 'OK' },
-        }));
+        .then(result => {
+          expect(result.toJSON()).to.eql({
+            id: 3,
+            name: 'Osom blog!',
+            myPosts: [
+              {
+                featuredPostId: null, BlogId: 3, id: 3, title: 'This thing works',
+              },
+            ],
+            featuredPost: {
+              featuredPostId: 3, BlogId: null, id: 4, title: 'OK',
+            },
+          });
+        });
     });
   });
 });

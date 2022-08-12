@@ -43,7 +43,7 @@ describe('Umzug support', () => {
       await JSONSchemaSequelizerCLI.execute(db, 'migrate');
       const { callCount, calls } = td.explain(log);
 
-      expect(callCount).to.eql(18);
+      expect(callCount).to.eql(22);
       expect(calls.pop().args).to.eql(['\rNo pending migrations']);
       expect(calls.pop().args).to.eql(['\rNo executed migrations']);
     });
@@ -52,8 +52,8 @@ describe('Umzug support', () => {
       await JSONSchemaSequelizerCLI.execute(db, 'migrate', { flags: { make: true } });
       const { calls } = td.explain(log);
 
-      expect(calls.pop().args[0]).to.match(/write.*create_blog/);
       expect(calls.pop().args[0]).to.match(/write.*create_family/);
+      expect(calls.pop().args[0]).to.match(/write.*create_blog/);
       expect(calls.pop().args[0]).to.match(/write.*create_person/);
       expect(calls.pop().args[0]).to.match(/write.*create_post/);
     });
@@ -64,14 +64,14 @@ describe('Umzug support', () => {
       const { calls } = td.explain(log);
 
       expect(calls.pop().args).to.eql(['\r4 migrations were applied']);
-      expect(calls.pop().args[0]).to.match(/migrated.*create_blog/);
-      calls.length -= 5;
-
-      expect(calls.pop().args[0]).to.match(/migrating.*create_blog/);
       expect(calls.pop().args[0]).to.match(/migrated.*create_family/);
       calls.length -= 5;
 
       expect(calls.pop().args[0]).to.match(/migrating.*create_family/);
+      expect(calls.pop().args[0]).to.match(/migrated.*create_blog/);
+      calls.length -= 5;
+
+      expect(calls.pop().args[0]).to.match(/migrating.*create_blog/);
       expect(calls.pop().args[0]).to.match(/migrated.*create_person/);
       calls.length -= 5;
 

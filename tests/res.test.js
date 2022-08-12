@@ -1,3 +1,4 @@
+const td = require('testdouble');
 const { expect } = require('chai');
 const JSONSchemaSequelizer = require('../lib');
 const t = require('./_sequelize');
@@ -17,7 +18,11 @@ const settings = [
   },
 ];
 
-/* global describe, it */
+/* global afterEach, describe, it */
+
+afterEach(() => {
+  td.reset();
+});
 
 settings.forEach(config => {
   let jss = null;
@@ -37,7 +42,7 @@ settings.forEach(config => {
         jss.models.Cart.options.$attributes = {
           findOne: ['items.name', 'items.price'],
         };
-      });
+      }).catch(console.log);
     });
 
     it('should skip primaryKeys when unique is false', () => {
@@ -60,24 +65,24 @@ settings.forEach(config => {
         ],
       };
 
-      return Promise.resolve().then(() => {
-        return jss.models.Product.create({
+      return Promise.resolve()
+        .then(() => jss.models.Product.create({
           name: 'Test',
           price: 1.23,
-        });
-      }).then(() => {
-        return Cart.actions.create(data);
-      }).then(([row]) => {
-        return row.getItems({
-          order: ['createdAt'],
-        });
-      })
+        }))
+        .then(() => jss.sequelize.transaction())
+        .then(_t => {
+          return Cart.actions.create(data, {
+            transaction: config.dialect === 'sqlite' ? _t : null,
+          }).then(result => _t.commit().then(() => result));
+        })
+        .then(([row]) => row.getItems({ order: ['createdAt'] }))
         .then(result => {
           const fixedData = result.map(x => {
             return [x.name, parseFloat(x.price), x.CartItem.qty];
-          });
+          }).sort((a, b) => b[2] - a[2]);
 
-          expect(fixedData).to.eql([['Test', 1.23, 4], ['One', 0.99, 5]]);
+          expect(fixedData).to.eql([['One', 0.99, 5], ['Test', 1.23, 4]]);
         });
     });
 
@@ -159,34 +164,63 @@ settings.forEach(config => {
       });
     });
 
-    it('should create data from nested associations ', () => {
-      return Promise.resolve()
-        .then(() => Cart.actions.create({
-          items: [
-            { qty: 2, Product: { name: 'Example', price: 0.20 } },
-            { qty: 2, Product: { id: 2, name: 'One', price: 0.99 } },
-            { qty: 2, Product: { id: 1, name: 'Test', price: 1.23 } },
-          ],
-        }))
-        .then(([row]) => Cart.actions.findOne({ where: { id: row.id } }).then(x => {
-          expect((x.items.reduce((a, b) => a + (b.Product.price * b.qty), 0)).toFixed(2)).to.eql('4.84');
-        }))
-        .then(() => Cart.actions.count().then(x => expect(x).to.eql(1)))
-        .then(() => jss.models.Product.count().then(x => expect(x).to.eql(3)))
-        .then(() => jss.models.CartItem.count().then(x => expect(x).to.eql(3)));
+    it('should create data from nested associations', async () => {
+      const [row] = await Cart.actions.create({
+        items: [
+          { qty: 2, Product: { name: 'Example', price: 0.20 } },
+          { qty: 3, Product: { id: 2, name: 'One', price: 0.99 } },
+          { qty: 4, Product: { id: 1, name: 'Test', price: 1.23 } },
+        ],
+      });
+
+      expect(await Cart.actions.count()).to.eql(1);
+      expect(await jss.models.Product.count()).to.eql(3);
+      expect(await jss.models.CartItem.count()).to.eql(3);
+
+      const result = await Cart.actions.findOne({ where: { id: row.id } });
+
+      expect((result.items.reduce((a, b) => a + (b.Product.price * b.qty), 0)).toFixed(2)).to.eql('8.29');
     });
 
-    it('should update data from nested associations ', () => {
+    it('should update data from nested associations', () => {
       return Promise.resolve()
         .then(() => Cart.actions.update({
           items: [
-            { id: 4, qty: 1, Product: { id: 1 } },
-            { id: 5, qty: 1, Product: { id: 2 } },
+            { id: 4, qty: 1, ProductId: 1 },
+            { id: 5, qty: 1, Product: { id: 2, name: 'OSOM' } },
           ],
         }, { where: { id: 2 } }))
         .then(() => Cart.actions.findOne({ where: { id: 2 } }).then(x => {
+          x.items.sort((a, b) => b.ProductId - a.ProductId);
           expect((x.items.reduce((a, b) => a + (b.Product.price * b.qty), 0)).toFixed(2)).to.eql('2.62');
+          expect(x.items.map(p => [p.Product.id, p.Product.name].join('.'))).to.eql(['3.Example', '2.OSOM', '1.Test']);
         }));
+    });
+
+    it('should update attachments from nested associations', async () => {
+      const Attachment = JSONSchemaSequelizer.resource(jss, 'Attachment');
+      const File = JSONSchemaSequelizer.resource(jss, 'File');
+
+      const payload = {
+        label: 'xxx',
+        File: {
+          kind: 'ATTACHMENT',
+          name: 'brightfox_logo.png',
+          type: 'image/png',
+          size: 13774,
+          path: 'tmp/6e13a9f4d09b7a8d03e55fe00.png',
+        },
+      };
+
+      await File.actions.create(payload.File);
+      await Attachment.actions.create({ id: payload.id, label: payload.label, FileId: 1 });
+      await Attachment.actions.create(payload);
+
+      expect(await Attachment.actions.count()).to.eql(2);
+      expect(await File.actions.count()).to.eql(2);
+      expect(await Attachment.actions.update({ ...payload, File: { ...payload.File, id: 2 } })).to.eql([2]);
+      expect(await Attachment.actions.count()).to.eql(2);
+      expect(await File.actions.count()).to.eql(2);
     });
 
     it('should update data from single associations', () => {
@@ -215,37 +249,79 @@ settings.forEach(config => {
         attachments: {
           files: {
             foo: {
-              path: '/tmp/uploads/bar',
+              path: '/tmp/uploads/foo',
             },
             baz: [{
               path: '/tmp/uploads/buzz',
             }, {
               path: '/tmp/uploads/bazzinga',
             }],
+            test: {
+              path: '/tmp/uploads/h12v3gj4byg2f34',
+              name: 'testing',
+              type: 'any/type',
+              size: 1234,
+            },
           },
           baseDir: '/tmp',
           uploadDir: 'uploads',
         },
       }, 'Product');
 
+      jss.models.Product.options.$attributes = {
+        findOne: ['name', 'price', 'image.path', 'images.path', 'attachment'],
+      };
+
+      td.replace(Date, 'now');
+      td.when(Date.now()).thenReturn(0);
+
       return Promise.resolve()
         .then(() => Product.actions.create({
           name: 'Test',
           price: 0.99,
-          image: 'data:foo/bar;base64,x',
+          image: 'data:mime/type;base64,x',
           image2: {
             $upload: 'foo',
           },
           images: [
             { $upload: 'baz' },
           ],
+          attachment: {
+            $upload: 'test',
+          },
         }))
-        .then(([, result]) => {
+        .then(([x, result]) => {
+          expect(x.id).to.eql(result.id);
           expect(result.image.imageId).to.eql(result.id);
           expect(result.image2.image2Id).to.eql(result.id);
-          expect(result.image2.path).to.eql('uploads/bar');
+          expect(result.image2.path).to.eql('uploads/foo');
           expect(result.images[0].ProductId).to.eql(result.id);
+          expect(result.images[1].ProductId).to.eql(result.id);
           expect(result.images[1].path).to.eql('uploads/bazzinga');
+          expect(result.attachment).to.eql('url:any/type;1234,testing@uploads/h12v3gj4byg2f34');
+
+          return Product.actions.findOne({ where: { id: x.id } }).then(sample => {
+            sample = sample.toJSON();
+            sample.price = parseFloat(sample.price);
+            sample.images.sort((a, b) => b.id - a.id);
+            expect(sample).to.eql({
+              id: 4,
+              name: 'Test',
+              price: 0.99,
+              attachment: 'url:any/type;1234,testing@uploads/h12v3gj4byg2f34',
+              image: {
+                ProductId: null, fileId: null, image2Id: null, imageId: 4, id: 3, path: 'uploads/0_mime.type',
+              },
+              images: [
+                {
+                  fileId: null, image2Id: null, imageId: null, ProductId: 4, id: 6, path: 'uploads/bazzinga',
+                },
+                {
+                  fileId: null, image2Id: null, imageId: null, ProductId: 4, id: 5, path: 'uploads/buzz',
+                },
+              ],
+            });
+          });
         });
     });
 
@@ -258,6 +334,12 @@ settings.forEach(config => {
             ok: {
               path: '/tmp/uploads/bar',
             },
+            not: [{
+              path: '/tmp/uploads/buah',
+            }],
+            test: {
+              path: '/tmp/uploads/OSOM',
+            },
           },
           baseDir: '/tmp',
           uploadDir: 'uploads',
@@ -265,11 +347,11 @@ settings.forEach(config => {
       }, 'Cart');
 
       jss.models.Product.options.$attributes = {
-        findOne: ['name', 'price', 'image.path'],
+        findOne: ['name', 'price', 'image.path', 'images.path'],
       };
 
       jss.models.Cart.options.$attributes = {
-        findOne: ['items.name', 'items.price', 'items.image.path'],
+        findOne: ['items.name', 'items.price', 'items.image.path', 'items.images.path'],
       };
 
       return Promise.resolve()
@@ -281,6 +363,7 @@ settings.forEach(config => {
                 name: 'Test',
                 price: 0.99,
                 image: { $upload: 'ok' },
+                images: [{ $upload: 'not' }, { $upload: 'test' }],
               },
             },
           ],
@@ -288,12 +371,45 @@ settings.forEach(config => {
         .then(([row]) => Cart.actions.findOne({ where: { id: row.id } }))
         .then(result => {
           expect(result.items[0].Product.image.path).to.eql('uploads/bar');
+          expect(result.items[0].Product.images.length).to.eql(2);
           return Product.actions.findOne({ where: { id: result.items[0].ProductId } })
-            .then(data => expect(data.image.path).to.eql('uploads/bar'));
-        });
+            .then(data => {
+              data.images.sort((a, b) => a.id - b.id);
+              expect(data.image.path).to.eql('uploads/bar');
+              expect(data.images[0].path).to.eql('uploads/buah');
+              expect(data.images[1].path).to.eql('uploads/OSOM');
+            });
+        })
+        .then(() => Cart.actions.update({
+          items: [
+            {
+              id: 6,
+              qty: 3,
+              Product: {
+                id: 5,
+                name: 'OSOM',
+                image: { id: 7, path: 'OK' },
+                images: [{ id: 8, path: 'WUT' }, { $upload: 'ok', path: 'OTHER' }],
+              },
+            },
+          ],
+        }, { where: { id: 3 } }))
+        .then(() => Cart.actions.findOne({ where: { id: 3 } }).then(result => {
+          expect(result.items[0].qty).to.eql(3);
+          expect(result.items[0].Product.name).to.eql('OSOM');
+          expect(result.items[0].Product.image.path).to.eql('OK');
+          expect(result.items[0].Product.images.length).to.eql(3);
+          return Product.actions.findOne({ where: { id: 5 } }).then(data => {
+            data.images.sort((a, b) => a.id - b.id);
+            expect(data.image.path).to.eql('OK');
+            expect(data.images[0].path).to.eql('WUT');
+            expect(data.images[1].path).to.eql('uploads/OSOM');
+            expect(data.images[2].path).to.eql('OTHER');
+          });
+        }));
     });
 
-    it('should process uploads from associated foreignKeys', () => {
+    it('should process uploads from associated models', () => {
       const Attachment = JSONSchemaSequelizer.resource(jss, {
         attachments: {
           files: {
@@ -309,9 +425,9 @@ settings.forEach(config => {
       return Promise.resolve()
         .then(() => Attachment.actions.create({
           label: 'test',
-          FileId: { $upload: 'ok' },
+          File: { $upload: 'ok' },
         })).then(([, result]) => {
-          expect(result).to.eql({ label: 'test', FileId: 6, id: 1 });
+          expect(result).to.eql({ label: 'test', FileId: 11, id: 3 });
         });
     });
 

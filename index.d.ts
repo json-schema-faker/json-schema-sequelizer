@@ -90,12 +90,11 @@ export interface ResourceAttachment {
 }
 
 export interface ResourceOptions {
-  raw?: boolean;
   keys?: string[];
   where?: string;
+  reload?: boolean;
   payload?: JsonObject;
   logging?: boolean | ((sql: string, timing?: number) => void);
-  noupdate?: boolean;
   fallthrough?: boolean;
   attachments?: {
     files?: {

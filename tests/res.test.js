@@ -199,6 +199,7 @@ settings.forEach(config => {
 
     it('should update attachments from nested associations', async () => {
       const Attachment = JSONSchemaSequelizer.resource(jss, 'Attachment');
+      const Example = JSONSchemaSequelizer.resource(jss, 'Example');
       const File = JSONSchemaSequelizer.resource(jss, 'File');
 
       const payload = {
@@ -213,14 +214,24 @@ settings.forEach(config => {
       };
 
       await File.actions.create(payload.File);
-      await Attachment.actions.create({ id: payload.id, label: payload.label, FileId: 1 });
       await Attachment.actions.create(payload);
+      await Attachment.actions.create({ label: payload.label });
 
-      expect(await Attachment.actions.count()).to.eql(2);
       expect(await File.actions.count()).to.eql(2);
+      expect(await Attachment.actions.count()).to.eql(2);
       expect(await Attachment.actions.update({ ...payload, File: { ...payload.File, id: 2 } })).to.eql([2]);
       expect(await Attachment.actions.count()).to.eql(2);
+
+      await Example.actions.create({
+        title: 'TITLE',
+        fileset: [{
+          ...payload.File,
+          Attachment: { label: 'LABEL' },
+        }],
+      });
+
       expect(await File.actions.count()).to.eql(2);
+      expect(await Attachment.actions.count()).to.eql(3);
     });
 
     it('should update data from single associations', () => {
@@ -279,14 +290,19 @@ settings.forEach(config => {
         .then(() => Product.actions.create({
           name: 'Test',
           price: 0.99,
-          image: 'data:mime/type;base64,x',
+          image: {
+            kind: 'ATTACHMENT',
+            $upload: 'data:mime/type;base64,x',
+          },
           image2: {
+            kind: 'ATTACHMENT',
             $upload: 'foo',
           },
           images: [
-            { $upload: 'baz' },
+            { kind: 'ATTACHMENT', $upload: 'baz' },
           ],
           attachment: {
+            kind: 'ATTACHMENT',
             $upload: 'test',
           },
         }))
@@ -362,8 +378,8 @@ settings.forEach(config => {
               Product: {
                 name: 'Test',
                 price: 0.99,
-                image: { $upload: 'ok' },
-                images: [{ $upload: 'not' }, { $upload: 'test' }],
+                image: { $upload: 'ok', kind: 'DOWNLOAD' },
+                images: [{ $upload: 'not', kind: 'ATTACHMENT' }, { $upload: 'test', kind: 'BACKUP' }],
               },
             },
           ],
@@ -389,7 +405,7 @@ settings.forEach(config => {
                 id: 5,
                 name: 'OSOM',
                 image: { id: 7, path: 'OK' },
-                images: [{ id: 8, path: 'WUT' }, { $upload: 'ok', path: 'OTHER' }],
+                images: [{ id: 8, path: 'WUT' }, { $upload: 'ok', path: 'OTHER', kind: 'BACKUP' }],
               },
             },
           ],
@@ -425,9 +441,9 @@ settings.forEach(config => {
       return Promise.resolve()
         .then(() => Attachment.actions.create({
           label: 'test',
-          File: { $upload: 'ok' },
+          File: { $upload: 'ok', kind: 'BACKUP' },
         })).then(([, result]) => {
-          expect(result).to.eql({ label: 'test', FileId: 11, id: 3 });
+          expect(result).to.eql({ label: 'test', FileId: 11, id: 4 });
         });
     });
 

@@ -6,6 +6,10 @@
       "primaryKey": true,
       "autoIncrement": true
     },
+    "kind": {
+      "type": "string",
+      "enum": ["ATTACHMENT", "DOWNLOAD", "BACKUP"]
+    },
     "mtime": {
       "type": "string",
       "format": "datetime"
@@ -22,5 +26,6 @@
     "type": {
       "type": "string"
     }
-  }
+  },
+  "required": ["kind"]
 }

@@ -52,10 +52,14 @@ describe('Umzug support', () => {
       await JSONSchemaSequelizerCLI.execute(db, 'migrate', { flags: { make: true } });
       const { calls } = td.explain(log);
 
-      expect(calls.pop().args[0]).to.match(/write.*create_family/);
-      expect(calls.pop().args[0]).to.match(/write.*create_blog/);
-      expect(calls.pop().args[0]).to.match(/write.*create_person/);
-      expect(calls.pop().args[0]).to.match(/write.*create_post/);
+      const migration = calls.filter(x => x.args[0].includes('create_')).map(x => x.args[0].replace(/\d+\.\d+\./, ''));
+
+      expect(migration).to.eql([
+        '\rwrite tests/sandbox/migrations/0_create_person.js',
+        '\rwrite tests/sandbox/migrations/1_create_post.js',
+        '\rwrite tests/sandbox/migrations/2_create_blog.js',
+        '\rwrite tests/sandbox/migrations/3_create_family.js',
+      ]);
     });
 
     it('can apply pending migrations from generated sources', async () => {
@@ -64,22 +68,23 @@ describe('Umzug support', () => {
       const { calls } = td.explain(log);
 
       expect(calls.pop().args).to.eql(['\r4 migrations were applied']);
-      expect(calls.pop().args[0]).to.match(/migrated.*create_family/);
-      calls.length -= 5;
 
-      expect(calls.pop().args[0]).to.match(/migrating.*create_family/);
-      expect(calls.pop().args[0]).to.match(/migrated.*create_blog/);
-      calls.length -= 5;
+      const migration = calls.filter(x => x.args[0].includes('create_')).map(x => x.args[0].replace(/\d+\.\d+\./, ''));
 
-      expect(calls.pop().args[0]).to.match(/migrating.*create_blog/);
-      expect(calls.pop().args[0]).to.match(/migrated.*create_person/);
-      calls.length -= 5;
-
-      expect(calls.pop().args[0]).to.match(/migrating.*create_person/);
-      expect(calls.pop().args[0]).to.match(/migrated.*create_post/);
-      calls.length -= 5;
-
-      expect(calls.pop().args[0]).to.match(/migrating.*create_post/);
+      expect(migration).to.eql([
+        '\rwrite tests/sandbox/migrations/0_create_person.js',
+        '\rwrite tests/sandbox/migrations/1_create_post.js',
+        '\rwrite tests/sandbox/migrations/2_create_blog.js',
+        '\rwrite tests/sandbox/migrations/3_create_family.js',
+        '\r=> migrating 0_create_person.js',
+        '\r=> migrated 0_create_person.js',
+        '\r=> migrating 1_create_post.js',
+        '\r=> migrated 1_create_post.js',
+        '\r=> migrating 2_create_blog.js',
+        '\r=> migrated 2_create_blog.js',
+        '\r=> migrating 3_create_family.js',
+        '\r=> migrated 3_create_family.js',
+      ]);
     });
   });
 });

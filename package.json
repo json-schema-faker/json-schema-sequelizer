@@ -11,6 +11,9 @@
     "cli/*",
     "*.d.ts"
   ],
+  "engines": {
+    "node": "*"
+  },
   "scripts": {
     "dev": "npm test -- -w",
     "lint": "eslint lib tests",

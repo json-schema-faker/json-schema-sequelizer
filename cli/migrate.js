@@ -1,7 +1,7 @@
 'use strict';
 
 const path = require('path');
-const glob = require('glob');
+const glob = require('fast-glob');
 const fs = require('fs-extra');
 
 const JSONSchemaSequelizer = require('../lib');
